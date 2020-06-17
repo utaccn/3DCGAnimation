@@ -1,0 +1,12 @@
+# ninja log v5
+5	126	614113540	shaders/shader_frag.glsl	20be7385a8ecd459
+10	130	614113540	shaders/shader_vert.glsl	856d3cabe28ccf13
+7	133	614113540	shaders/shader_frag_environment.glsl	345496572dd45a2b
+1	142	614113540	shaders/shadow_vert.glsl	c3c1d6dfb4f87d33
+14	147	614113540	shaders/shader_vert_environment.glsl	e7096992e6efdc8a
+167	911	614113541	CMakeFiles/FinalProject.dir/src/stb_image.cpp.obj	d686621b2e0d5bf0
+163	3617	614113543	CMakeFiles/FinalProject.dir/src/window.cpp.obj	70b81e9ae5883ef2
+156	4241	614113544	CMakeFiles/FinalProject.dir/src/texture.cpp.obj	169026872ba47172
+147	4955	614113545	CMakeFiles/FinalProject.dir/src/application.cpp.obj	98aea7dbbc6de33f
+159	5389	614113545	CMakeFiles/FinalProject.dir/src/shader.cpp.obj	fae4743ba8323f6
+152	5635	614113545	CMakeFiles/FinalProject.dir/src/mesh.cpp.obj	7f031dc68f2f5a50
