@@ -45,6 +45,18 @@ void Camera::rotateX(float angle)
     m_up = glm::normalize(glm::cross(m_forward, horAxis));
 }
 
+/*
+float degreesX;
+float Camera::rotationX()
+{
+    return degreesX;
+}
+float degreesY;
+float Camera::rotationY()
+{
+    return degreesY;
+} */
+
 void Camera::rotateY(float angle)
 {
     const glm::vec3 horAxis = glm::cross(s_yAxis, m_forward);
@@ -83,6 +95,8 @@ void Camera::updateCamera()
                 rotateY(-delta.x);
             if (delta.y != 0.0f)
                 rotateX(delta.y);
+            //degreesX += delta.y*50;
+            //degreesY -= delta.x*50;
         }
     } else {
         m_prevCursorPos = m_pWindow->getCursorPos();

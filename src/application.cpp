@@ -29,6 +29,7 @@ public:
         , environment("resources/environment_01.obj")
         , m_texture("resources/checkerboard.png")
         , m_camera(&m_window)
+        , cameraLight{ &m_window, glm::vec3(3.0f, 3.0f, 3.0f), glm::vec3(5.0f, 5.0f, 5.0f) }
 
     {
         m_window.registerKeyCallback([this](int key, int scancode, int action, int mods) {
@@ -84,18 +85,22 @@ public:
             // ...
             glEnable(GL_DEPTH_TEST);
 
-            //const glm::mat4 mvpMatrix = m_projectionMatrix * m_viewMatrix * m_modelMatrix;
-            
+            //const glm::mat4 mvpMatrix = m_projectionMatrix * m_viewMatrix * m_modelMatrix;            
             //My camera View !!!!!!!
-            //m_modelMatrix = glm::translate(m_modelMatrix, m_camera.cameraPos());
             glm::mat4 mvpMatrix = m_projectionMatrix * m_camera.viewMatrix() * m_modelMatrix;
+            const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix(); // Assume model matrix is identity.
+            glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
+            const glm::vec3 lightPos = cameraLight.cameraPos();
+            glUniform3fv(4, 1, glm::value_ptr(lightPos));
 
             // Normals should be transformed differently than positions (ignoring translations + dealing with scaling):
             // https://paroj.github.io/gltut/Illumination/Tut09%20Normal%20Transformation.html
             const glm::mat3 normalModelMatrix = glm::inverseTranspose(glm::mat3(m_modelMatrix));
 
-            //Trying to move character according to camera position
+            //Move character according to camera position
             glm::mat4 newModelMatrix = glm::translate(m_modelMatrix, glm::vec3(-0.5, -0.5, -0.5) + m_camera.cameraPos());
+  //          newModelMatrix = glm::rotate(newModelMatrix, -glm::radians(m_camera.rotationX()), glm::vec3(1, 0, 0));
+  //          newModelMatrix = glm::rotate(newModelMatrix, glm::radians(m_camera.rotationY()), glm::vec3(0, 1, 0));
             glm::mat3 newnormalModelMatrix = glm::inverseTranspose(glm::mat3(newModelMatrix));
             glm::mat4 newmvpMatrix = m_projectionMatrix * m_camera.viewMatrix() * newModelMatrix;
             m_defaultShader.bind();
@@ -116,14 +121,17 @@ public:
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
             glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(m_modelMatrix));
             glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(normalModelMatrix));
-            if (m_mesh.hasTextureCoords()) {
+            glUniform3fv(3, 1, glm::value_ptr(m_camera.cameraPos()));
+            glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
+
+/*            if (m_mesh.hasTextureCoords()) {
                 m_texture.bind(GL_TEXTURE0);
                 glUniform1i(3, 0);
                 glUniform1i(4, GL_TRUE);
             }
             else {
                 glUniform1i(4, GL_FALSE);
-            }
+            }*/
             environment.draw();
 
             // Processes input and swaps the window buffer
@@ -175,6 +183,7 @@ public:
 private:
     Window m_window;
     Camera m_camera;
+    Camera cameraLight;
     
     // Shader for default rendering and for depth rendering    
     Shader m_defaultShader;
