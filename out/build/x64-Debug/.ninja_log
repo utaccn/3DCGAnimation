@@ -1,0 +1,19 @@
+# ninja log v5
+5	122	614117287	shaders/shader_frag.glsl	20be7385a8ecd459
+10	128	614117287	shaders/shader_vert.glsl	856d3cabe28ccf13
+7	165	614117287	shaders/shadow_vert.glsl	c3c1d6dfb4f87d33
+1	168	614117287	shaders/shader_vert_environment.glsl	e7096992e6efdc8a
+13	173	614117287	shaders/shader_frag_environment.glsl	345496572dd45a2b
+193	1867	614117288	CMakeFiles/FinalProject.dir/src/stb_image.cpp.obj	d686621b2e0d5bf0
+1867	4005	614117291	CMakeFiles/FinalProject.dir/src/camera.cpp.obj	e79497a6da30b541
+182	4331	614117291	CMakeFiles/FinalProject.dir/src/window.cpp.obj	70b81e9ae5883ef2
+186	5051	614117292	CMakeFiles/FinalProject.dir/src/texture.cpp.obj	169026872ba47172
+189	5171	614117292	CMakeFiles/FinalProject.dir/src/shader.cpp.obj	fae4743ba8323f6
+178	5674	614117292	CMakeFiles/FinalProject.dir/src/application.cpp.obj	98aea7dbbc6de33f
+173	6329	614117293	CMakeFiles/FinalProject.dir/src/mesh.cpp.obj	7f031dc68f2f5a50
+3	69	614117309	CMakeFiles/FinalProject.dir/src/tiny_obj.cpp.obj	c70af62305f41dd5
+69	8298	614117311	FinalProject.exe	4f40444d1ecf2f0c
+26	4548	614129551	CMakeFiles/FinalProject.dir/src/tiny_obj.cpp.obj	c70af62305f41dd5
+4580	21248	614129553	FinalProject.exe	4f40444d1ecf2f0c
+7	1365	614176623	CMakeFiles/FinalProject.dir/src/tiny_obj.cpp.obj	c70af62305f41dd5
+1366	12291	614176627	FinalProject.exe	4f40444d1ecf2f0c
