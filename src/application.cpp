@@ -44,6 +44,7 @@ public:
                 onMouseClicked(button, mods);
             else if (action == GLFW_RELEASE)
                 onMouseReleased(button, mods);
+
         });
 
         try {
@@ -67,43 +68,92 @@ public:
             //     Visual Studio: PROJECT => Generate Cache for ComputerGraphics
             //     VS Code: ctrl + shift + p => CMake: Configure => enter
             // ....
+
+
         } catch (ShaderLoadingException e) {
             std::cerr << e.what() << std::endl;
         }
+
     }
 
     void update()
     {
+        // === Create Shadow Texture ===
+        GLuint texShadow;
+        const int SHADOWTEX_WIDTH = 1024;
+        const int SHADOWTEX_HEIGHT = 1024;
+        glCreateTextures(GL_TEXTURE_2D, 1, &texShadow);
+        glTextureStorage2D(texShadow, 1, GL_DEPTH_COMPONENT32F, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
+        // Set behaviour for when texture coordinates are outside the [0, 1] range.
+        glTextureParameteri(texShadow, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(texShadow, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        // Set interpolation for texture sampling (GL_NEAREST for no interpolation).
+        glTextureParameteri(texShadow, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTextureParameteri(texShadow, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        // === Create framebuffer for extra texture ===
+        GLuint framebuffer;
+        glCreateFramebuffers(1, &framebuffer);
+        glNamedFramebufferTexture(framebuffer, GL_DEPTH_ATTACHMENT, texShadow, 0);
+
         // This is your game loop
         // Put your real-time logic and rendering in here
         while (!m_window.shouldClose()) {
             m_window.updateInput();
-            // Clear the screen
-            glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            {
+                // Clear the screen
+                glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+                //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                // Bind the off-screen framebuffer
+                glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+                // Clear the shadow map and set needed options
+                glClearDepth(1.0f);
+                glClear(GL_DEPTH_BUFFER_BIT);
+                glEnable(GL_DEPTH_TEST);
 
-            // ...
-            glEnable(GL_DEPTH_TEST);
+                // Bind the shader
+                m_shadowShader.bind();
+                // Set viewport size
+                glViewport(0, 0, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
 
-            //const glm::mat4 mvpMatrix = m_projectionMatrix * m_viewMatrix * m_modelMatrix;            
-            //My camera View !!!!!!!
-            glm::mat4 mvpMatrix = m_projectionMatrix * m_camera.viewMatrix() * m_modelMatrix;
+                //const glm::mat4 mvpMatrix = m_projectionMatrix * m_viewMatrix * m_modelMatrix;            
+                //My camera Light for shadow !!!!!!!
+                const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix()*m_modelMatrix; // Assume model matrix is identity.
+                glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
+                environment.draw();
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
+            m_environmentShader.bind();
+            //m_defaultShader.bind();
+            glm::mat4 mvpMatrix = m_projectionMatrix * m_camera.viewMatrix() *m_modelMatrix;
+            //const glm::vec3 lightPos = cameraLight.cameraPos();
+            //glUniform3fv(4, 1, glm::value_ptr(lightPos));
+            const glm::mat4 mvp = m_projectionMatrix * m_camera.viewMatrix(); // Assume model matrix is identity.
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvp));
+
+            //?????????????????????????????????????????//
+
+            /*
+            GLuint texture_unit = 4;
+            glActiveTexture(GL_TEXTURE0+4);
+            glBindTexture(GL_TEXTURE_2D, texShadow);
+            glUniform1i(9, texture_unit);
+            */
             const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix(); // Assume model matrix is identity.
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
             const glm::vec3 lightPos = cameraLight.cameraPos();
             glUniform3fv(4, 1, glm::value_ptr(lightPos));
-
+/*
             // Normals should be transformed differently than positions (ignoring translations + dealing with scaling):
             // https://paroj.github.io/gltut/Illumination/Tut09%20Normal%20Transformation.html
             const glm::mat3 normalModelMatrix = glm::inverseTranspose(glm::mat3(m_modelMatrix));
 
             //Move character according to camera position
             glm::mat4 newModelMatrix = glm::translate(m_modelMatrix, glm::vec3(-0.5, -0.5, -0.5) + m_camera.cameraPos());
-  //          newModelMatrix = glm::rotate(newModelMatrix, -glm::radians(m_camera.rotationX()), glm::vec3(1, 0, 0));
-  //          newModelMatrix = glm::rotate(newModelMatrix, glm::radians(m_camera.rotationY()), glm::vec3(0, 1, 0));
+            //          newModelMatrix = glm::rotate(newModelMatrix, -glm::radians(m_camera.rotationX()), glm::vec3(1, 0, 0));
+            //          newModelMatrix = glm::rotate(newModelMatrix, glm::radians(m_camera.rotationY()), glm::vec3(0, 1, 0));
             glm::mat3 newnormalModelMatrix = glm::inverseTranspose(glm::mat3(newModelMatrix));
             glm::mat4 newmvpMatrix = m_projectionMatrix * m_camera.viewMatrix() * newModelMatrix;
-            m_defaultShader.bind();
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(newmvpMatrix));
             glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(newModelMatrix));
             glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(newnormalModelMatrix));
@@ -111,7 +161,8 @@ public:
                 m_texture.bind(GL_TEXTURE0);
                 glUniform1i(3, 0);
                 glUniform1i(4, GL_TRUE);
-            } else {
+            }
+            else {
                 glUniform1i(4, GL_FALSE);
             }
 
@@ -121,22 +172,36 @@ public:
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
             glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(m_modelMatrix));
             glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(normalModelMatrix));
-            glUniform3fv(3, 1, glm::value_ptr(m_camera.cameraPos()));
+            glUniform3fv(1, 1, glm::value_ptr(m_camera.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
 
-/*            if (m_mesh.hasTextureCoords()) {
-                m_texture.bind(GL_TEXTURE0);
-                glUniform1i(3, 0);
-                glUniform1i(4, GL_TRUE);
-            }
-            else {
-                glUniform1i(4, GL_FALSE);
-            }*/
-            environment.draw();
+            /*            if (m_mesh.hasTextureCoords()) {
+                            m_texture.bind(GL_TEXTURE0);
+                            glUniform1i(3, 0);
+                            glUniform1i(4, GL_TRUE);
+                        }
+                        else {
+                            glUniform1i(4, GL_FALSE);
+                        }*/
+            GLuint texture_unit = 0;
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, texShadow);
+            glUniform1i(9, texture_unit);
 
+            //environment.draw();
+
+            glClearDepth(1.0f);
+            glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDisable(GL_CULL_FACE);
+            glEnable(GL_DEPTH_TEST);
+            environment.draw();
+            
             // Processes input and swaps the window buffer
             m_window.swapBuffers();
         }
+            glDeleteFramebuffers(1, &framebuffer);
+            glDeleteTextures(1, &texShadow);
     }
 
     // In here you can handle key presses
@@ -198,6 +263,8 @@ private:
     glm::mat4 m_projectionMatrix = glm::perspective(glm::radians(80.0f), 1.0f, 0.1f, 100.0f);
     glm::mat4 m_viewMatrix = glm::lookAt(glm::vec3(-1, 1, -1), glm::vec3(0), glm::vec3(0, 1, 0));
     glm::mat4 m_modelMatrix { 1.0f };
+
+
 };
 
 int main()

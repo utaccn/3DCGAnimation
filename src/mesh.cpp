@@ -136,6 +136,7 @@ void Mesh::draw()
     glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, nullptr);
 }
 
+
 void Mesh::moveInto(Mesh&& other)
 {
     freeGpuMemory();
