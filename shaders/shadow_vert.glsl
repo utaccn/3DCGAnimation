@@ -18,7 +18,6 @@ layout(location = 3) uniform mat4 lightMVP;
 // Data to pass to fragment shader
 out vec3 fragPos;
 out vec3 fragNormal;
-out vec4 fragLightCoord;
 
 void main() {
 	// Transform 3D position into on-screen position
