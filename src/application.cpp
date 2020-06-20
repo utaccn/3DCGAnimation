@@ -28,11 +28,12 @@ public:
         , m_mesh("resources/dragon.obj")
         , environment("resources/environment_01.obj")
         , m_texture("resources/checkerboard.png")
-        , m_camera{ &m_window, glm::vec3(10.f, 5.0f, 5.0f), -glm::vec3(10.f, 5.0f, 5.0f) }
-        , cameraLight { &m_window, glm::vec3(10.f, 5.0f, 5.0f), -glm::vec3(10.f, 5.0f, 5.0f) }
+        , m_camera{ &m_window, glm::vec3(12.f, 8.0f, 3.2f), -glm::vec3(12.f, 8.0f, 3.2f) }
+        , cameraLight { &m_window, glm::vec3(7.f, 8.0f, -18.f), -glm::vec3(7.f, 8.0f, -18.f) }
 
     {
-
+        m_camera.setUserInteraction(true);
+        cameraLight.setUserInteraction(false);
         // === Create Shadow Texture ===
 
         glCreateTextures(GL_TEXTURE_2D, 1, &texShadow);
@@ -119,18 +120,19 @@ public:
                 glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
 
                 environment.draw();
+                m_mesh.draw();
                 // Unbind the off-screen framebuffer
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             }
             m_defaultShader.bind();
 
-            const glm::mat3 normalModelMatrix = glm::inverseTranspose(glm::mat3(m_modelMatrix));
-            const glm::mat4 mvpMatrix = m_projectionMatrix * m_viewMatrix * m_modelMatrix;
+            //const glm::mat3 normalModelMatrix = glm::inverseTranspose(glm::mat3(m_modelMatrix));
+            const glm::mat4 mvpMatrix = m_projectionMatrix * m_camera.viewMatrix()* m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
 
-            const glm::vec3 cameraPos = m_camera.cameraPos();
-            glUniform3fv(1, 1, glm::value_ptr(cameraPos));
+            //const glm::vec3 cameraPos = m_camera.cameraPos();
+            //glUniform3fv(1, 1, glm::value_ptr(cameraPos));
 
             const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix(); // Assume model matrix is identity.
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
@@ -156,6 +158,7 @@ public:
             //glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(normalModelMatrix));
 
             environment.draw();
+            m_mesh.draw();
             // Processes input and swaps the window buffer
             m_window.swapBuffers();
         }
@@ -191,6 +194,7 @@ public:
     // mods - Any modifier buttons pressed
     void onMouseClicked(int button, int mods)
     {
+        std::cout << "cameraX:" << m_camera.cameraPos().x << "cameraY:" << m_camera.cameraPos().y << "cameraZ:" << m_camera.cameraPos().z << std::endl;
         m_camera.setUserInteraction(true);
         cameraLight.setUserInteraction(false);
         std::cout << "Pressed mouse button: " << button << std::endl;
@@ -220,8 +224,8 @@ private:
     Texture m_texture;
 
     // Projection and view matrices for you to fill in and use
-    glm::mat4 m_projectionMatrix = glm::perspective(glm::radians(80.0f), 1.0f, 0.1f, 30.0f);
-    glm::mat4 m_projectionLightMatrix = glm::perspective(glm::pi<float>() / 4.0f, 1.0f, 0.1f, 500.0f);
+    //glm::mat4 m_projectionMatrix = glm::perspective(glm::radians(80.0f), 1.0f, 0.1f, 300.0f);
+    glm::mat4 m_projectionMatrix = glm::perspective(glm::pi<float>() / 4.0f, 1.0f, 0.1f, 500.0f);
     
     glm::mat4 m_viewMatrix = glm::lookAt(glm::vec3(-1, 1, -1), glm::vec3(0), glm::vec3(0, 1, 0));
     glm::mat4 m_modelMatrix { 1.0f };

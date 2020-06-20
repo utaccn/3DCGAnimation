@@ -13,7 +13,7 @@ in vec3 fragNormal; // World-space normal
 
 in vec4 fragLightCoord;
 vec3 lightCoord;
-float bias = 0.005;
+float bias = 0.00005;
 
 const int pcfCount =2;
 const float totalTexels = (pcfCount*2.0 +1.0) * (pcfCount*2.0 +1.0);
