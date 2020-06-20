@@ -28,8 +28,8 @@ public:
         , m_mesh("resources/dragon.obj")
         , environment("resources/environment_01.obj")
         , m_texture("resources/checkerboard.png")
-        , m_camera(&m_window)
-        , cameraLight{ &m_window, glm::vec3(3.0f, 3.0f, 3.0f), glm::vec3(5.0f, 5.0f, 5.0f) }
+        , m_camera{ &m_window, glm::vec3(10.f, 10.0f, 5.0f), -glm::vec3(10.f, 10.0f, 5.0f) }
+        , cameraLight { &m_window, glm::vec3(10.f, 10.0f, 5.0f), -glm::vec3(10.f, 10.0f, 5.0f) }
 
     {
         m_window.registerKeyCallback([this](int key, int scancode, int action, int mods) {
@@ -80,8 +80,8 @@ public:
     {
         // === Create Shadow Texture ===
         GLuint texShadow;
-        const int SHADOWTEX_WIDTH = 1024;
-        const int SHADOWTEX_HEIGHT = 1024;
+        const int SHADOWTEX_WIDTH = 2048;
+        const int SHADOWTEX_HEIGHT = 2048;
         glCreateTextures(GL_TEXTURE_2D, 1, &texShadow);
         glTextureStorage2D(texShadow, 1, GL_DEPTH_COMPONENT32F, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
         // Set behaviour for when texture coordinates are outside the [0, 1] range.
@@ -95,6 +95,7 @@ public:
         GLuint framebuffer;
         glCreateFramebuffers(1, &framebuffer);
         glNamedFramebufferTexture(framebuffer, GL_DEPTH_ATTACHMENT, texShadow, 0);
+       
 
         // This is your game loop
         // Put your real-time logic and rendering in here
@@ -102,35 +103,39 @@ public:
             m_window.updateInput();
             {
                 // Clear the screen
-                glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+                //glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
                 //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 // Bind the off-screen framebuffer
                 glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-                // Clear the shadow map and set needed options
                 glClearDepth(1.0f);
                 glClear(GL_DEPTH_BUFFER_BIT);
                 glEnable(GL_DEPTH_TEST);
+                
+                // Clear the shadow map and set needed options
+                //glClearDepth(1.0f);
 
                 // Bind the shader
                 m_shadowShader.bind();
                 // Set viewport size
                 glViewport(0, 0, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
-
                 //const glm::mat4 mvpMatrix = m_projectionMatrix * m_viewMatrix * m_modelMatrix;            
                 //My camera Light for shadow !!!!!!!
-                const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix()*m_modelMatrix; // Assume model matrix is identity.
+                const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix(); // Assume model matrix is identity.
                 glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
+                m_mesh.draw();
                 environment.draw();
+                //m_mesh.draw();
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
             }
             m_environmentShader.bind();
             //m_defaultShader.bind();
-            glm::mat4 mvpMatrix = m_projectionMatrix * m_camera.viewMatrix() *m_modelMatrix;
+            //glm::mat4 mvpMatrix = m_projectionMatrix * m_camera.viewMatrix() *m_modelMatrix;
             //const glm::vec3 lightPos = cameraLight.cameraPos();
             //glUniform3fv(4, 1, glm::value_ptr(lightPos));
             const glm::mat4 mvp = m_projectionMatrix * m_camera.viewMatrix(); // Assume model matrix is identity.
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvp));
-
+            //const glm::vec3 cameraPos = m_camera.cameraPos();
+            //glUniform3fv(1, 1, glm::value_ptr(cameraPos));
             //?????????????????????????????????????????//
 
             /*
@@ -189,13 +194,14 @@ public:
             glUniform1i(9, texture_unit);
 
             //environment.draw();
-
+            glViewport(0, 0, 1024, 1024);
             glClearDepth(1.0f);
             glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glDisable(GL_CULL_FACE);
             glEnable(GL_DEPTH_TEST);
             environment.draw();
+            m_mesh.draw();
             
             // Processes input and swaps the window buffer
             m_window.swapBuffers();
@@ -233,6 +239,7 @@ public:
     void onMouseClicked(int button, int mods)
     {
         m_camera.setUserInteraction(true);
+        cameraLight.setUserInteraction(false);
         std::cout << "Pressed mouse button: " << button << std::endl;
        
     }
@@ -260,7 +267,9 @@ private:
     Texture m_texture;
 
     // Projection and view matrices for you to fill in and use
-    glm::mat4 m_projectionMatrix = glm::perspective(glm::radians(80.0f), 1.0f, 0.1f, 100.0f);
+    //glm::mat4 m_projectionMatrix = glm::perspective(glm::radians(80.0f), 1.0f, 0.1f, 100.0f);
+    glm::mat4 m_projectionMatrix = glm::perspective(glm::pi<float>() / 4.0f, 1.0f, 0.1f, 100.0f);
+    
     glm::mat4 m_viewMatrix = glm::lookAt(glm::vec3(-1, 1, -1), glm::vec3(0), glm::vec3(0, 1, 0));
     glm::mat4 m_modelMatrix { 1.0f };
 
