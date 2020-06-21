@@ -3,6 +3,13 @@
 // Global variables for lighting calculations.
 layout(location = 2) uniform sampler2D texShadow;
 layout(location = 4) uniform vec3 lightPos;
+layout(location = 5) uniform vec3 cameraPos;
+
+//Parameters for Blinn-Phong shading
+vec3 lightColor = vec3(0.95, 0.85, 0.5);
+//vec3 ks = vec3(0.001);
+//float ks = 0.1;
+float shine = 1.6f;
 
 // Output for on-screen color.
 layout(location = 0) out vec4 outColor;
@@ -57,7 +64,15 @@ vec2 shadowMapCoord = lightCoord.xy;
         float visibility = 1.0 - total;
         float multi = distance(shadowMapCoord, vec2(0.5,0.5));
         
-    //Render Spot light with PCF
-    outColor = vec4(visibility*vec3(max(dot(fragNormal,lightDir),0.0)),1.0);
+//Blinn-Phong shading values
+    vec3 viewDir = cameraPos - fragPos;
+    vec3 lightDio = lightPos - fragPos;
+    vec3 halfDir = normalize(lightDio + viewDir);
+    float specAngle = dot(normalize(fragNormal), halfDir);
+    float specular = pow(specAngle, shine);
+    // Output the normal as color
+
+    //Render light with PCF
+    outColor = vec4(lightColor*specular*visibility*vec3(max(dot(fragNormal,lightDir),0.0)),1.0);
 
 }

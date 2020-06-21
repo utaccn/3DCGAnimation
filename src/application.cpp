@@ -29,7 +29,7 @@ public:
         , environment("resources/environment_01.obj")
         , m_texture("resources/checkerboard.png")
         , m_camera{ &m_window, glm::vec3(12.f, 8.0f, 3.2f), -glm::vec3(12.f, 8.0f, 3.2f) }
-        , cameraLight { &m_window, glm::vec3(7.f, 8.0f, -18.f), -glm::vec3(7.f, 8.0f, -18.f) }
+        , cameraLight { &m_window, glm::vec3(7.f, 13.0f, -18.f), -glm::vec3(7.f, 13.0f, -18.f) }
 
     {
         m_camera.setUserInteraction(true);
@@ -127,7 +127,7 @@ public:
             }
             m_defaultShader.bind();
 
-            //const glm::mat3 normalModelMatrix = glm::inverseTranspose(glm::mat3(m_modelMatrix));
+            const glm::mat3 normalModelMatrix = glm::inverseTranspose(glm::mat3(m_modelMatrix));
             const glm::mat4 mvpMatrix = m_projectionMatrix * m_camera.viewMatrix()* m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
 
@@ -136,6 +136,7 @@ public:
 
             const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix(); // Assume model matrix is identity.
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
+            glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
 
             const glm::vec3 lightPos = cameraLight.cameraPos();
             glUniform3fv(4, 1, glm::value_ptr(lightPos));
@@ -145,7 +146,6 @@ public:
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texShadow);
             glUniform1i(2, texture_unit);
-
             glViewport(0, 0, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
 
             // Clear the framebuffer to black and depth to maximum value
@@ -154,8 +154,6 @@ public:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glDisable(GL_CULL_FACE);
             glEnable(GL_DEPTH_TEST);
-
-            //glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(normalModelMatrix));
 
             environment.draw();
             m_mesh.draw();
