@@ -7,9 +7,10 @@ layout(location = 5) uniform vec3 cameraPos;
 
 //Parameters for Blinn-Phong shading
 vec3 lightColor = vec3(0.95, 0.85, 0.5);
+vec3 ambientColor = vec3(0.15,0.05,0.05);
 //vec3 ks = vec3(0.001);
 //float ks = 0.1;
-float shine = 1.6f;
+float shine = 7.f;
 
 // Output for on-screen color.
 layout(location = 0) out vec4 outColor;
@@ -73,6 +74,6 @@ vec2 shadowMapCoord = lightCoord.xy;
     // Output the normal as color
 
     //Render light with PCF
-    outColor = vec4(lightColor*specular*visibility*vec3(max(dot(fragNormal,lightDir),0.0)),1.0);
+    outColor = vec4(visibility*(ambientColor+lightColor*specular*vec3(max(dot(fragNormal,lightDir),0.0))),1.0);
 
 }

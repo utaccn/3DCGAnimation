@@ -26,6 +26,7 @@ public:
     Application()
         : m_window(glm::ivec2(1024, 1024), "Final Project", false)
         , m_mesh("resources/dragon.obj")
+        , robot("resources/RIGING_MODEL_04.obj")
         , environment("resources/environment_01.obj")
         , m_texture("resources/checkerboard.png")
         , m_camera{ &m_window, glm::vec3(12.f, 8.0f, 3.2f), -glm::vec3(12.f, 8.0f, 3.2f) }
@@ -116,11 +117,18 @@ public:
                 m_shadowShader.bind();
                 glViewport(0, 0, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
 
-                const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix(); // Assume model matrix is identity.
+                const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix()*m_modelMatrix; // Assume model matrix is identity.
                 glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
 
                 environment.draw();
                 m_mesh.draw();
+                
+                //Move model matrix to render shadow map for robot model
+                const glm::mat4 robotmodelMatrix = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
+                const glm::mat4 robotlightmvp = m_projectionMatrix * cameraLight.viewMatrix() *robotmodelMatrix;
+                glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(robotlightmvp));
+                robot.draw();
+
                 // Unbind the off-screen framebuffer
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -130,9 +138,6 @@ public:
             const glm::mat3 normalModelMatrix = glm::inverseTranspose(glm::mat3(m_modelMatrix));
             const glm::mat4 mvpMatrix = m_projectionMatrix * m_camera.viewMatrix()* m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
-
-            //const glm::vec3 cameraPos = m_camera.cameraPos();
-            //glUniform3fv(1, 1, glm::value_ptr(cameraPos));
 
             const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix(); // Assume model matrix is identity.
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
@@ -157,6 +162,18 @@ public:
 
             environment.draw();
             m_mesh.draw();
+
+            //Robot model with Toon shading
+            m_environmentShader.bind();
+            const glm::mat4 robotmodelMatrix = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
+            const glm::mat3 robotNormalModelMatrix = glm::inverseTranspose(glm::mat3(robotmodelMatrix));
+            const glm::mat4 robotmvpMatrix = m_projectionMatrix * m_camera.viewMatrix() * robotmodelMatrix;
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(robotmvpMatrix));
+            glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(robotmodelMatrix));
+            glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(robotNormalModelMatrix));
+            glUniform3fv(3, 1, glm::value_ptr(cameraLight.cameraPos()));
+            glUniform3fv(4, 1, glm::value_ptr(m_camera.cameraPos()));
+            robot.draw();
             // Processes input and swaps the window buffer
             m_window.swapBuffers();
         }
@@ -217,6 +234,7 @@ private:
     Shader m_shadowShader;
     Shader m_environmentShader;
 
+    Mesh robot;
     Mesh m_mesh;
     Mesh environment;
     Texture m_texture;

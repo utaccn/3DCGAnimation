@@ -67,7 +67,7 @@ void Camera::rotateY(float angle)
 
 void Camera::updateCamera()
 {
-    constexpr float moveSpeed = 0.08f;
+    constexpr float moveSpeed = 0.01f;
     constexpr float lookSpeed = 0.0035f;
 
     if (m_userInteraction) {
