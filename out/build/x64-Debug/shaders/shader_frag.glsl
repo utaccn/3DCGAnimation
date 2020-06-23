@@ -1,7 +1,7 @@
 #version 450 core
 
 // Global variables for lighting calculations.
-layout(location = 2) uniform sampler2D texShadow;
+layout(location = 8) uniform sampler2D texShadow;
 layout(location = 4) uniform vec3 lightPos;
 layout(location = 5) uniform vec3 cameraPos;
 
@@ -21,7 +21,7 @@ in vec3 fragNormal; // World-space normal
 
 in vec4 fragLightCoord;
 vec3 lightCoord;
-float bias = 0.00005;
+float bias = 0.0001;
 
 const int pcfCount =2;
 const float totalTexels = (pcfCount*2.0 +1.0) * (pcfCount*2.0 +1.0);

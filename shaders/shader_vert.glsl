@@ -2,6 +2,8 @@
 
 // Model/view/projection matrix
 layout(location = 0) uniform mat4 mvpMatrix;
+layout(location = 1) uniform mat4 modelMatrix;
+layout(location = 2) uniform mat3 normalModelMatrix;
 
 // Per-vertex attributes
 layout(location = 0) in vec3 position; // World-space position

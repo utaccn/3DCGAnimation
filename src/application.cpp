@@ -27,9 +27,9 @@ public:
         : m_window(glm::ivec2(1024, 1024), "Final Project", false)
         , m_mesh("resources/dragon.obj")
         , robot("resources/RIGING_MODEL_04.obj")
-        , environment("resources/environment_01.obj")
+        , environment("resources/floor_houses.obj")
         , m_texture("resources/checkerboard.png")
-        , m_camera{ &m_window, glm::vec3(12.f, 8.0f, 3.2f), -glm::vec3(12.f, 8.0f, 3.2f) }
+        , m_camera { &m_window, glm::vec3(1.f, 1.0f, 1.f), -glm::vec3(1.f, 1.f,1.f) }
         , cameraLight { &m_window, glm::vec3(7.f, 13.0f, -18.f), -glm::vec3(7.f, 13.0f, -18.f) }
 
     {
@@ -138,6 +138,8 @@ public:
             const glm::mat3 normalModelMatrix = glm::inverseTranspose(glm::mat3(m_modelMatrix));
             const glm::mat4 mvpMatrix = m_projectionMatrix * m_camera.viewMatrix()* m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
+            glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(m_modelMatrix));
+            glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(normalModelMatrix));
 
             const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix(); // Assume model matrix is identity.
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
@@ -150,7 +152,7 @@ public:
             GLuint texture_unit = 0;
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texShadow);
-            glUniform1i(2, texture_unit);
+            glUniform1i(8, texture_unit);
             glViewport(0, 0, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
 
             // Clear the framebuffer to black and depth to maximum value
@@ -185,7 +187,13 @@ public:
     // key - Integer that corresponds to numbers in https://www.glfw.org/docs/latest/group__keys.html
     // mods - Any modifier keys pressed, like shift or control
     void onKeyPressed(int key, int mods)
-    {
+    {/*
+        if (key = 88) {
+            shade = x_ray_shader;
+        }
+        else {
+            shade = m_environmentShader;
+        }*/
         std::cout << "Key pressed: " << key << std::endl;
     }
 
@@ -233,6 +241,7 @@ private:
     Shader m_defaultShader;
     Shader m_shadowShader;
     Shader m_environmentShader;
+    Shader shade;
 
     Mesh robot;
     Mesh m_mesh;
