@@ -67,7 +67,8 @@ void main()
 	}
 
 	//X-toon
-	    float dist = distance(normalize(cameraPos), normalize(fragPos));
-	outColor = vec4(viewDir, 1.0);
-	//outColor = vec4(lambert + texture(texToon, vec2(specular, -viewDir)));
+	
+	
+	//outColor = vec4(viewDir, 1.0);
+	outColor = vec4(lambert + texture(texToon, vec2(specular, -viewDir)));
 }
