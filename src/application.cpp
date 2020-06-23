@@ -29,6 +29,7 @@ public:
         , robot("resources/RIGING_MODEL_04.obj")
         , environment("resources/floor_houses.obj")
         , m_texture("resources/checkerboard.png")
+        , texToon("resources/toon_map.png")
         , m_camera { &m_window, glm::vec3(1.f, 1.0f, 1.f), -glm::vec3(1.f, 1.f,1.f) }
         , cameraLight { &m_window, glm::vec3(7.f, 13.0f, -18.f), -glm::vec3(7.f, 13.0f, -18.f) }
 
@@ -83,6 +84,10 @@ public:
             environmentBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/shader_frag_environment.glsl");
             m_environmentShader = environmentBuilder.build();
 
+            ShaderBuilder x_rayBuilder;
+            x_rayBuilder.addStage(GL_VERTEX_SHADER, "shaders/x_ray_vert.glsl");
+            x_rayBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/x_ray_frag.glsl");
+            x_ray = x_rayBuilder.build();
 
             // Any new shaders can be added below in similar fashion.
             // ==> Don't forget to reconfigure CMake when you do!
@@ -133,13 +138,23 @@ public:
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             }
-            m_defaultShader.bind();
+            if (x_shader == 1){
+                x_ray.bind();
+                texToon.bind(GL_TEXTURE1);
+                glUniform1i(10, 1);
+            }
+            else {
+                m_defaultShader.bind();
+            }
+
 
             const glm::mat3 normalModelMatrix = glm::inverseTranspose(glm::mat3(m_modelMatrix));
             const glm::mat4 mvpMatrix = m_projectionMatrix * m_camera.viewMatrix()* m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
-            glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(m_modelMatrix));
-            glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(normalModelMatrix));
+
+            //Don't know if this should go here <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            //glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(m_modelMatrix));
+            //glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(normalModelMatrix));
 
             const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix(); // Assume model matrix is identity.
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
@@ -167,6 +182,7 @@ public:
 
             //Robot model with Toon shading
             m_environmentShader.bind();
+            
             const glm::mat4 robotmodelMatrix = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
             const glm::mat3 robotNormalModelMatrix = glm::inverseTranspose(glm::mat3(robotmodelMatrix));
             const glm::mat4 robotmvpMatrix = m_projectionMatrix * m_camera.viewMatrix() * robotmodelMatrix;
@@ -186,15 +202,17 @@ public:
     // In here you can handle key presses
     // key - Integer that corresponds to numbers in https://www.glfw.org/docs/latest/group__keys.html
     // mods - Any modifier keys pressed, like shift or control
-    void onKeyPressed(int key, int mods)
-    {/*
-        if (key = 88) {
-            shade = x_ray_shader;
+    int onKeyPressed(int key, int mods)
+    {
+        if (key == 88 && x_shader==0) {
+            x_shader = 1;
         }
-        else {
-            shade = m_environmentShader;
-        }*/
+        else if (key == 88 && x_shader == 1) {
+            x_shader = 0;
+        }
+
         std::cout << "Key pressed: " << key << std::endl;
+           return key;
     }
 
     // In here you can handle key releases
@@ -209,7 +227,6 @@ public:
     void onMouseMove(const glm::dvec2& cursorPos)
     {
         std::cout << "Mouse at position: " << cursorPos.x << " " << cursorPos.y << std::endl;
-  //m_viewMatrix = glm::lookAt(glm::vec3(cursorPos.x / 1024, cursorPos.y / 1024, -1), glm::vec3(0), glm::vec3(0, 1, 0));
         }
 
     // If one of the mouse buttons is pressed this function will be called
@@ -241,17 +258,18 @@ private:
     Shader m_defaultShader;
     Shader m_shadowShader;
     Shader m_environmentShader;
-    Shader shade;
+    Shader x_ray;
+    int x_shader = 0;
 
     Mesh robot;
     Mesh m_mesh;
     Mesh environment;
     Texture m_texture;
+    Texture texToon;
 
     // Projection and view matrices for you to fill in and use
     //glm::mat4 m_projectionMatrix = glm::perspective(glm::radians(80.0f), 1.0f, 0.1f, 300.0f);
-    glm::mat4 m_projectionMatrix = glm::perspective(glm::pi<float>() / 4.0f, 1.0f, 0.1f, 500.0f);
-    
+    glm::mat4 m_projectionMatrix = glm::perspective(glm::pi<float>() / 4.0f, 1.0f, 0.1f, 500.0f);  
     glm::mat4 m_viewMatrix = glm::lookAt(glm::vec3(-1, 1, -1), glm::vec3(0), glm::vec3(0, 1, 0));
     glm::mat4 m_modelMatrix { 1.0f };
 
