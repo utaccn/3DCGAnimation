@@ -29,7 +29,7 @@ public:
         , robot("resources/RIGING_MODEL_04.obj")
         , environment("resources/floor_houses.obj")
         , m_texture("resources/checkerboard.png")
-        , texToon("resources/toon_map.png")
+        , texToon("resources/zio.jpg")
         , m_camera { &m_window, glm::vec3(1.f, 1.0f, 1.f), -glm::vec3(1.f, 1.f,1.f) }
         , cameraLight { &m_window, glm::vec3(7.f, 13.0f, -18.f), -glm::vec3(7.f, 13.0f, -18.f) }
 
@@ -146,8 +146,7 @@ public:
             else {
                 m_defaultShader.bind();
             }
-
-
+            
             const glm::mat3 normalModelMatrix = glm::inverseTranspose(glm::mat3(m_modelMatrix));
             const glm::mat4 mvpMatrix = m_projectionMatrix * m_camera.viewMatrix()* m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
@@ -182,7 +181,6 @@ public:
 
             //Robot model with Toon shading
             m_environmentShader.bind();
-            
             const glm::mat4 robotmodelMatrix = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
             const glm::mat3 robotNormalModelMatrix = glm::inverseTranspose(glm::mat3(robotmodelMatrix));
             const glm::mat4 robotmvpMatrix = m_projectionMatrix * m_camera.viewMatrix() * robotmodelMatrix;

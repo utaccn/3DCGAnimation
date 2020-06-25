@@ -51,10 +51,6 @@ void main()
 	else {
 		contr = 1.0;
 	}
-	// Output the normal as color
-	vec3 dio = normalize(fragPos-lightPos);
-	vec3 cane = kD*dot(normalize(fragNormal),dio);
-
 	//Discarding Pixels touched by light
 	float shadowMapDepth2 = texture(texShadow, shadowMapCoord).x;
 	
@@ -68,7 +64,8 @@ void main()
 
 	//X-toon
 	
-	
-	//outColor = vec4(viewDir, 1.0);
-	outColor = vec4(lambert + texture(texToon, vec2(specular, -viewDir)));
+	float z_dist = gl_FragCoord.z/(gl_FragCoord.w*50);
+	outColor = vec4(vec3(z_dist), 1.0);
+
+	outColor = vec4(lambert + texture(texToon, vec2(z_dist, specular)));
 }

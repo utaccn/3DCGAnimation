@@ -19,8 +19,8 @@ in vec3 fragNormal; // World-space normal
 
 void main()
 {
-    vec3 viewDir = fragPos-cameraPos;
-    vec3 lightDir = fragPos-lightPos;
+    vec3 viewDir = cameraPos - fragPos;
+    vec3 lightDir = fragPos - lightPos;
 
     vec3 halfDir = normalize(lightDir + viewDir);
     float specAngle = dot(normalize(fragNormal), halfDir);
@@ -35,8 +35,11 @@ void main()
     // Output the normal as color
     vec3 dio = normalize(fragPos-lightPos);
     vec3 cane = kD*dot(normalize(fragNormal),dio);
+    //vec3 diffuse = kD*dot(fragNormal, dio);
 
     //outColor = vec4(vec3(contr), 1.0);
     outColor = vec4(lightColor*abs(contr*(floor((cane*toonDiscr))/toonDiscr)), 1.0);
-    //outColor = vec4(color, 1.0);
+    //outColor = vec4(lightColor*abs(contr*(floor((cane*toonDiscr))/toonDiscr)), 1.0);
+
+    //outColor = vec4(vec3(diffuse), 1.0);
 }

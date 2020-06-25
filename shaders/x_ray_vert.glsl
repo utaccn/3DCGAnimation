@@ -17,7 +17,7 @@ out vec4 fragLightCoord;
 void main()
 {
     gl_Position = mvpMatrix * vec4(position, 1);
-    
+
     fragPos = position;
     fragNormal = normal;
     fragLightCoord =  lightMVP * vec4(fragPos, 1.0);
