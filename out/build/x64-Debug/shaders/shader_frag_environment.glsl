@@ -5,7 +5,7 @@
 layout(location = 4) uniform vec3 cameraPos;
 layout(location = 3) uniform vec3 lightPos;
 
-vec3 lightColor = vec3(0.95, 0.85, 0.5);
+vec3 lightColor = vec3(0.95, 0.5, 0.2);
 float threshold = 0.5;
 int toonDiscr = 6;
 vec3 kD = vec3(0.5);

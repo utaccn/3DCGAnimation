@@ -27,7 +27,7 @@ Texture::Texture(std::filesystem::path filePath)
 
     // Set behaviour for when texture coordinates are outside the [0, 1] range.
     glTextureParameteri(m_texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(m_texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(m_texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
 
     // Set interpolation for texture sampling (GL_NEAREST for no interpolation).
     glTextureParameteri(m_texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

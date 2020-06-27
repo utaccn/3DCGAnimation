@@ -27,11 +27,15 @@ public:
         : m_window(glm::ivec2(1024, 1024), "Final Project", false)
         , m_mesh("resources/dragon.obj")
         , robot("resources/RIGING_MODEL_04.obj")
-        , environment("resources/floor_houses.obj")
+        , environment("resources/only_houses.obj")
+        , just_floor("resources/floor.obj")
         , m_texture("resources/checkerboard.png")
+        , trees_head("resources/trees_head.obj")
+        , trunks("resources/trunks.obj")
         , texToon("resources/zio.jpg")
-        , m_camera { &m_window, glm::vec3(1.f, 1.0f, 1.f), -glm::vec3(1.f, 1.f,1.f) }
-        , cameraLight { &m_window, glm::vec3(7.f, 13.0f, -18.f), -glm::vec3(7.f, 13.0f, -18.f) }
+        , grass("resources/grass1.png")
+        , m_camera { &m_window, glm::vec3(2.f, 2.0f, -2.f), -glm::vec3(2.f, 2.0f, -2.f) }//glm::vec3(1.f, 1.0f, 1.f), -glm::vec3(1.f, 1.f,1.f) }
+        , cameraLight { &m_window, glm::vec3(30.f, 30.0f, -14.f), -glm::vec3(30.f, 30.0f, -14.f) }//glm::vec3(7.f, 13.0f, -18.f), -glm::vec3(7.f, 13.0f, -18.f) }
 
     {
         m_camera.setUserInteraction(true);
@@ -79,15 +83,30 @@ public:
             shadowBuilder.addStage(GL_VERTEX_SHADER, "shaders/shadow_vert.glsl");
             m_shadowShader = shadowBuilder.build();
 
-            ShaderBuilder environmentBuilder;
-            environmentBuilder.addStage(GL_VERTEX_SHADER, "shaders/shader_vert_environment.glsl");
-            environmentBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/shader_frag_environment.glsl");
-            m_environmentShader = environmentBuilder.build();
+            ShaderBuilder toonBuilder;
+            toonBuilder.addStage(GL_VERTEX_SHADER, "shaders/toon_vert.glsl");
+            toonBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/toon_frag.glsl");
+            toonShader = toonBuilder.build();
 
             ShaderBuilder x_rayBuilder;
             x_rayBuilder.addStage(GL_VERTEX_SHADER, "shaders/x_ray_vert.glsl");
             x_rayBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/x_ray_frag.glsl");
             x_ray = x_rayBuilder.build();
+
+            ShaderBuilder floorBuilder;
+            floorBuilder.addStage(GL_VERTEX_SHADER, "shaders/floor_vert.glsl");
+            floorBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/floor_frag.glsl");
+            floorShader = floorBuilder.build();
+
+            ShaderBuilder trees_headBuilder;
+            trees_headBuilder.addStage(GL_VERTEX_SHADER, "shaders/trees_head_vert.glsl");
+            trees_headBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/trees_head_frag.glsl");
+            trees_headShader = trees_headBuilder.build();
+
+            ShaderBuilder trunksBuilder;
+            trunksBuilder.addStage(GL_VERTEX_SHADER, "shaders/trunk_vert.glsl");
+            trunksBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/trunk_frag.glsl");
+            trunkShader = trunksBuilder.build();
 
             // Any new shaders can be added below in similar fashion.
             // ==> Don't forget to reconfigure CMake when you do!
@@ -127,7 +146,8 @@ public:
 
                 environment.draw();
                 m_mesh.draw();
-                
+                trees_head.draw();
+                trunks.draw();
                 //Move model matrix to render shadow map for robot model
                 const glm::mat4 robotmodelMatrix = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
                 const glm::mat4 robotlightmvp = m_projectionMatrix * cameraLight.viewMatrix() *robotmodelMatrix;
@@ -138,27 +158,24 @@ public:
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             }
-            if (x_shader == 1){
+            if (x_shader == 0){
+                m_defaultShader.bind();
+            }
+            else {
                 x_ray.bind();
                 texToon.bind(GL_TEXTURE1);
                 glUniform1i(10, 1);
-            }
-            else {
-                m_defaultShader.bind();
             }
             
             const glm::mat3 normalModelMatrix = glm::inverseTranspose(glm::mat3(m_modelMatrix));
             const glm::mat4 mvpMatrix = m_projectionMatrix * m_camera.viewMatrix()* m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
-
             //Don't know if this should go here <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             //glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(m_modelMatrix));
             //glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(normalModelMatrix));
-
             const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix(); // Assume model matrix is identity.
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
             glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
-
             const glm::vec3 lightPos = cameraLight.cameraPos();
             glUniform3fv(4, 1, glm::value_ptr(lightPos));
 
@@ -179,8 +196,51 @@ public:
             environment.draw();
             m_mesh.draw();
 
+            if (x_shader == 0) {
+                trees_headShader.bind();
+            }
+            else {
+                x_ray.bind();
+                texToon.bind(GL_TEXTURE1);
+                glUniform1i(10, 1);
+            }
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
+            glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
+            glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
+            glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
+            glUniform1i(8, 0);
+            trees_head.draw();
+
+            if (x_shader == 0) {
+                trunkShader.bind();
+            }
+            else {
+                x_ray.bind();
+                texToon.bind(GL_TEXTURE1);
+                glUniform1i(10, 1);
+            }
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
+            glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
+            glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
+            glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
+            glUniform1i(8, 0);
+            trunks.draw();
+
+            
+            floorShader.bind();
+          //  if (just_floor.hasTextureCoords()) {
+                grass.bind(GL_TEXTURE2);
+                glUniform1i(9, 2);
+            //}
+                const glm::mat4 mvpMatrixF = m_projectionMatrix * m_camera.viewMatrix()* m_modelMatrix;
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrixF));
+            glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix* cameraLight.viewMatrix()));
+            glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
+            glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
+            just_floor.draw();
+
             //Robot model with Toon shading
-            m_environmentShader.bind();
+            toonShader.bind();
             const glm::mat4 robotmodelMatrix = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
             const glm::mat3 robotNormalModelMatrix = glm::inverseTranspose(glm::mat3(robotmodelMatrix));
             const glm::mat4 robotmvpMatrix = m_projectionMatrix * m_camera.viewMatrix() * robotmodelMatrix;
@@ -255,15 +315,24 @@ private:
     // Shader for default rendering and for depth rendering    
     Shader m_defaultShader;
     Shader m_shadowShader;
-    Shader m_environmentShader;
+    Shader toonShader;
     Shader x_ray;
+    Shader floorShader;
+    Shader trees_headShader;
+    Shader trunkShader;
+
     int x_shader = 0;
 
     Mesh robot;
     Mesh m_mesh;
     Mesh environment;
+    Mesh just_floor;
+    Mesh trees_head;
+    Mesh trunks;
+
     Texture m_texture;
     Texture texToon;
+    Texture grass;
 
     // Projection and view matrices for you to fill in and use
     //glm::mat4 m_projectionMatrix = glm::perspective(glm::radians(80.0f), 1.0f, 0.1f, 300.0f);

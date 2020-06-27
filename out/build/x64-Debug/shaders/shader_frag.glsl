@@ -6,8 +6,8 @@ layout(location = 4) uniform vec3 lightPos;
 layout(location = 5) uniform vec3 cameraPos;
 
 //Parameters for Blinn-Phong shading
-vec3 lightColor = vec3(0.95, 0.85, 0.5);
-vec3 ambientColor = vec3(0.15,0.05,0.05);
+vec3 lightColor = vec3(0.95, 0.5, 0.2);
+vec3 ambientColor = vec3(0.2,0.2,0.2);
 //vec3 ks = vec3(0.001);
 //float ks = 0.1;
 float shine = 7.f;
@@ -21,9 +21,9 @@ in vec3 fragNormal; // World-space normal
 
 in vec4 fragLightCoord;
 vec3 lightCoord;
-float bias = 0.0001;
+float bias = 0.001;
 
-const int pcfCount =2;
+const int pcfCount =4;
 const float totalTexels = (pcfCount*2.0 +1.0) * (pcfCount*2.0 +1.0);
 
 void main()
