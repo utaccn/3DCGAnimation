@@ -69,7 +69,8 @@ vec2 shadowMapCoord = lightCoord.xy;
     vec3 viewDir = cameraPos - fragPos;
     vec3 lightDio = lightPos - fragPos;
     vec3 halfDir = normalize(lightDio + viewDir);
-    float specAngle = dot(normalize(fragNormal), halfDir);
+    float specAngle = max(dot(halfDir, fragNormal), 0.0);
+    //float specAngle = dot(normalize(fragNormal), halfDir);
     float specular = pow(specAngle, shine);
     // Output the normal as color
 
