@@ -10,7 +10,7 @@ vec3 lightColor = vec3(0.95, 0.5, 0.2);
 vec3 ambientColor = vec3(0.2,0.2,0.2);
 //vec3 ks = vec3(0.001);
 //float ks = 0.1;
-float shine = 7.f;
+float shine = 9.f;
 
 // Output for on-screen color.
 layout(location = 0) out vec4 outColor;

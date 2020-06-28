@@ -17,6 +17,7 @@ public:
 
     glm::vec3 cameraPos() const;
     glm::mat4 viewMatrix() const;
+    glm::vec3 getTarget() const;
 //    float rotationX();
 //    float rotationY();
 

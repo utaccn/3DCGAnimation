@@ -194,8 +194,18 @@ public:
             glEnable(GL_DEPTH_TEST);
 
             environment.draw();
-            m_mesh.draw();
-
+            if (firstPerson == false) {
+                glm::vec3 newCameraPos = glm::vec3(2., 1., 2.);
+                /*glm::vec3 charPos = m_camera.cameraPos() + glm::vec3(3.0) * (m_camera.getTarget() - m_camera.cameraPos());
+                glm::mat4 charLocation = glm::translate(m_modelMatrix, charPos);
+                const glm::mat4 mvpMMatrix = m_projectionMatrix * m_camera.viewMatrix() * charLocation;
+                glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMMatrix));*/
+                glm::mat4 lucAt = glm::lookAt(newCameraPos, glm::vec3(0., 0., 0.), glm::vec3(0, 1, 0));
+                const glm::mat4 mvpMMatrix = m_projectionMatrix * lucAt * m_modelMatrix;
+                glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMMatrix));
+                m_mesh.draw();
+            }
+            else { m_mesh.draw(); }
             if (x_shader == 0) {
                 trees_headShader.bind();
             }
@@ -269,6 +279,13 @@ public:
             x_shader = 0;
         }
 
+        if (key == 49 && firstPerson == true) {
+            firstPerson = false;
+        }
+        else if (key == 49 && firstPerson == false) {
+            firstPerson = true;
+        }
+
         std::cout << "Key pressed: " << key << std::endl;
            return key;
     }
@@ -322,6 +339,7 @@ private:
     Shader trunkShader;
 
     int x_shader = 0;
+    int firstPerson = true;
 
     Mesh robot;
     Mesh m_mesh;
