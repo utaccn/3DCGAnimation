@@ -16,6 +16,7 @@ DISABLE_WARNINGS_PUSH()
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp>
+
 DISABLE_WARNINGS_POP()
 #include <functional>
 #include <iostream>
@@ -25,7 +26,7 @@ class Application {
 public:
     Application()
         : m_window(glm::ivec2(1024, 1024), "Final Project", false)
-        , m_mesh("resources/dragon.obj")
+        , m_mesh("resources/chara.obj")
         , robot("resources/RIGING_MODEL_04.obj")
         , environment("resources/only_houses.obj")
         , just_floor("resources/floor.obj")
@@ -34,29 +35,47 @@ public:
         , trunks("resources/trunks.obj")
         , texToon("resources/zio.jpg")
         , grass("resources/grass1.png")
-        , m_camera { &m_window, glm::vec3(2.f, 2.0f, -2.f), -glm::vec3(2.f, 2.0f, -2.f) }//glm::vec3(1.f, 1.0f, 1.f), -glm::vec3(1.f, 1.f,1.f) }
-        , cameraLight { &m_window, glm::vec3(30.f, 30.0f, -14.f), -glm::vec3(30.f, 30.0f, -14.f) }//glm::vec3(7.f, 13.0f, -18.f), -glm::vec3(7.f, 13.0f, -18.f) }
+        , m_camera { &m_window, glm::vec3(2.f, 2.0f, -2.f), -glm::vec3(2.f, 2.0f, -2.f) }
+        , cameraLight { &m_window, glm::vec3(30.f, 30.0f, -14.f), -glm::vec3(30.f, 30.0f, -14.f) }
+        , minimapCamera{ &m_window, glm::vec3(0.f, 20.0f, 0.f), -glm::vec3(0.f, 20.0f, 0.f) }
 
     {
         m_camera.setUserInteraction(true);
         cameraLight.setUserInteraction(false);
+
         // === Create Shadow Texture ===
 
         glCreateTextures(GL_TEXTURE_2D, 1, &texShadow);
         glTextureStorage2D(texShadow, 1, GL_DEPTH_COMPONENT32F, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
-
         // Set behaviour for when texture coordinates are outside the [0, 1] range.
         glTextureParameteri(texShadow, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTextureParameteri(texShadow, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
         // Set interpolation for texture sampling (GL_NEAREST for no interpolation).
         glTextureParameteri(texShadow, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTextureParameteri(texShadow, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
         // === Create framebuffer for extra texture ===
-
         glCreateFramebuffers(1, &framebuffer);
         glNamedFramebufferTexture(framebuffer, GL_DEPTH_ATTACHMENT, texShadow, 0);
+
+        //MINIMAP
+        glCreateTextures(GL_TEXTURE_2D, 1, &minimap);
+        glTextureStorage2D(minimap, 1, GL_DEPTH_COMPONENT32F, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
+        glTextureParameteri(minimap, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(minimap, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(minimap, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTextureParameteri(minimap, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glCreateFramebuffers(1, &framebuffo);
+        glNamedFramebufferTexture(framebuffo, GL_COLOR_ATTACHMENT0, minimap, 0);
+        // Set the list of draw buffers.
+        GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, DrawBuffers); 
+        // The depth buffer
+        GLuint rbo;
+        glGenRenderbuffers(1, &rbo);
+        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, 1024, 1024);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rbo);
+
 
         m_window.registerKeyCallback([this](int key, int scancode, int action, int mods) {
             if (action == GLFW_PRESS)
@@ -108,6 +127,11 @@ public:
             trunksBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/trunk_frag.glsl");
             trunkShader = trunksBuilder.build();
 
+            ShaderBuilder miniBuilder;
+            miniBuilder.addStage(GL_VERTEX_SHADER, "shaders/minimap_vert.glsl");
+            miniBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/minimap_frag.glsl");
+            minimapShader = miniBuilder.build();
+
             // Any new shaders can be added below in similar fashion.
             // ==> Don't forget to reconfigure CMake when you do!
             //     Visual Studio: PROJECT => Generate Cache for ComputerGraphics
@@ -118,11 +142,36 @@ public:
         } catch (ShaderLoadingException e) {
             std::cerr << e.what() << std::endl;
         }
+        float vertexx[] = {
+             0.5f,  0.5f, 0.0f,  // top right
+             0.5f, -0.5f, 0.0f,  // bottom right
+            -0.5f, -0.5f, 0.0f,  // bottom left
+            -0.5f,  0.5f, 0.0f   // top left 
+        };
+        unsigned int indices[] = {  // note that we start from 0!
+    0, 1, 3,   // first triangle
+    1, 2, 3    // second triangle
+        };
+
+        glGenVertexArrays(1, &VAOO);
+        glGenBuffers(1, &VBOO);
+        glGenBuffers(1, &EBOO);
+        glBindVertexArray(VAOO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBOO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertexx), vertexx, GL_STATIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
 
     }
+    unsigned int fbo;
+    unsigned int VAOO, VBOO, EBOO;
 
     GLuint framebuffer;
     GLuint texShadow;
+    GLuint framebuffo;
+    GLuint minimap;
     const int SHADOWTEX_WIDTH = 1024;
     const int SHADOWTEX_HEIGHT = 1024;
 
@@ -158,6 +207,15 @@ public:
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             }
+            glClearDepth(1.0f);
+            glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDisable(GL_CULL_FACE);
+            glEnable(GL_DEPTH_TEST);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, framebuffo);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glViewport(0, 0, 1024, 1024);
             if (x_shader == 0){
                 m_defaultShader.bind();
             }
@@ -166,6 +224,7 @@ public:
                 texToon.bind(GL_TEXTURE1);
                 glUniform1i(10, 1);
             }
+           
             
             const glm::mat3 normalModelMatrix = glm::inverseTranspose(glm::mat3(m_modelMatrix));
             const glm::mat4 mvpMatrix = m_projectionMatrix * m_camera.viewMatrix()* m_modelMatrix;
@@ -184,16 +243,17 @@ public:
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texShadow);
             glUniform1i(8, texture_unit);
-            glViewport(0, 0, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
-
+            //glViewport(0, 0, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
+            /*
             // Clear the framebuffer to black and depth to maximum value
             glClearDepth(1.0f);
             glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glDisable(GL_CULL_FACE);
-            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_DEPTH_TEST); */
 
             environment.draw();
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
             if (firstPerson == false) {
                 glm::vec3 newCameraPos = glm::vec3(2., 1., 2.);
                 /*glm::vec3 charPos = m_camera.cameraPos() + glm::vec3(3.0) * (m_camera.getTarget() - m_camera.cameraPos());
@@ -236,7 +296,6 @@ public:
             glUniform1i(8, 0);
             trunks.draw();
 
-            
             floorShader.bind();
           //  if (just_floor.hasTextureCoords()) {
                 grass.bind(GL_TEXTURE2);
@@ -248,7 +307,7 @@ public:
             glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
             just_floor.draw();
-
+            
             //Robot model with Toon shading
             toonShader.bind();
             const glm::mat4 robotmodelMatrix = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
@@ -260,11 +319,28 @@ public:
             glUniform3fv(3, 1, glm::value_ptr(cameraLight.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(m_camera.cameraPos()));
             robot.draw();
+           
+
+            //MINIMAP
+            minimapShader.bind();
+            const glm::mat4 mvpMini = m_projectionMatrix * m_camera.viewMatrix() * m_modelMatrix; // Assume model matrix is identity.
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMini));
+            glActiveTexture(GL_TEXTURE4);
+            glBindTexture(GL_TEXTURE_2D, minimap);
+            glUniform1i(10, 4);
+            glBindVertexArray(VAOO);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
             // Processes input and swaps the window buffer
             m_window.swapBuffers();
         }
+        glDeleteVertexArrays(1, &VAOO);
+        glDeleteBuffers(1, &VBOO);
+        glDeleteBuffers(1, &EBOO);
         glDeleteFramebuffers(1, &framebuffer);
+        glDeleteFramebuffers(1, &framebuffo);
         glDeleteTextures(1, &texShadow);
+        glDeleteTextures(1, &minimap);
     }
 
     // In here you can handle key presses
@@ -328,6 +404,7 @@ private:
     Window m_window;
     Camera m_camera;
     Camera cameraLight;
+    Camera minimapCamera;
     
     // Shader for default rendering and for depth rendering    
     Shader m_defaultShader;
@@ -337,6 +414,7 @@ private:
     Shader floorShader;
     Shader trees_headShader;
     Shader trunkShader;
+    Shader minimapShader;
 
     int x_shader = 0;
     int firstPerson = true;
