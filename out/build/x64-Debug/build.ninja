@@ -146,7 +146,7 @@ build rebuild_cache: phony CMakeFiles\rebuild_cache.util
 #############################################
 # Utility command for copy_shaders
 
-build copy_shaders: phony CMakeFiles\copy_shaders shaders\floor_frag.glsl shaders\floor_vert.glsl shaders\minimap_frag.glsl shaders\minimap_vert.glsl shaders\shader_frag.glsl shaders\shader_vert.glsl shaders\shadow_vert.glsl shaders\toon_frag.glsl shaders\toon_vert.glsl shaders\trees_head_frag.glsl shaders\trees_head_vert.glsl shaders\trunk_frag.glsl shaders\trunk_vert.glsl shaders\x_ray_frag.glsl shaders\x_ray_vert.glsl
+build copy_shaders: phony CMakeFiles\copy_shaders shaders\floor_frag.glsl shaders\floor_vert.glsl shaders\minimap_char_frag.glsl shaders\minimap_char_vert.glsl shaders\minimap_frag.glsl shaders\minimap_vert.glsl shaders\shader_frag.glsl shaders\shader_vert.glsl shaders\shadow_vert.glsl shaders\toon_frag.glsl shaders\toon_vert.glsl shaders\trees_head_frag.glsl shaders\trees_head_vert.glsl shaders\trunk_frag.glsl shaders\trunk_vert.glsl shaders\x_ray_frag.glsl shaders\x_ray_vert.glsl
 
 
 #############################################
@@ -163,7 +163,7 @@ build edit_cache: phony CMakeFiles\edit_cache.util
 #############################################
 # Phony custom command for CMakeFiles\copy_shaders
 
-build CMakeFiles\copy_shaders: phony shaders\floor_frag.glsl shaders\floor_vert.glsl shaders\minimap_frag.glsl shaders\minimap_vert.glsl shaders\shader_frag.glsl shaders\shader_vert.glsl shaders\shadow_vert.glsl shaders\toon_frag.glsl shaders\toon_vert.glsl shaders\trees_head_frag.glsl shaders\trees_head_vert.glsl shaders\trunk_frag.glsl shaders\trunk_vert.glsl shaders\x_ray_frag.glsl shaders\x_ray_vert.glsl
+build CMakeFiles\copy_shaders: phony shaders\floor_frag.glsl shaders\floor_vert.glsl shaders\minimap_char_frag.glsl shaders\minimap_char_vert.glsl shaders\minimap_frag.glsl shaders\minimap_vert.glsl shaders\shader_frag.glsl shaders\shader_vert.glsl shaders\shadow_vert.glsl shaders\toon_frag.glsl shaders\toon_vert.glsl shaders\trees_head_frag.glsl shaders\trees_head_vert.glsl shaders\trunk_frag.glsl shaders\trunk_vert.glsl shaders\x_ray_frag.glsl shaders\x_ray_vert.glsl
 
 
 #############################################
@@ -181,6 +181,24 @@ build shaders\floor_frag.glsl: CUSTOM_COMMAND ..\..\..\shaders\floor_frag.glsl
 build shaders\floor_vert.glsl: CUSTOM_COMMAND ..\..\..\shaders\floor_vert.glsl
   COMMAND = cmd.exe /C "cd /D "C:\Users\ricch\OneDrive\Desktop\Mauro\Uni\3D Computer Graphics and Animation\F_Project\out\build\x64-Debug" && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E copy "C:/Users/ricch/OneDrive/Desktop/Mauro/Uni/3D Computer Graphics and Animation/F_Project/shaders/floor_vert.glsl" "C:/Users/ricch/OneDrive/Desktop/Mauro/Uni/3D Computer Graphics and Animation/F_Project/out/build/x64-Debug/shaders/floor_vert.glsl""
   DESC = Generating shaders/floor_vert.glsl
+  restat = 1
+
+
+#############################################
+# Custom command for shaders\minimap_char_frag.glsl
+
+build shaders\minimap_char_frag.glsl: CUSTOM_COMMAND ..\..\..\shaders\minimap_char_frag.glsl
+  COMMAND = cmd.exe /C "cd /D "C:\Users\ricch\OneDrive\Desktop\Mauro\Uni\3D Computer Graphics and Animation\F_Project\out\build\x64-Debug" && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E copy "C:/Users/ricch/OneDrive/Desktop/Mauro/Uni/3D Computer Graphics and Animation/F_Project/shaders/minimap_char_frag.glsl" "C:/Users/ricch/OneDrive/Desktop/Mauro/Uni/3D Computer Graphics and Animation/F_Project/out/build/x64-Debug/shaders/minimap_char_frag.glsl""
+  DESC = Generating shaders/minimap_char_frag.glsl
+  restat = 1
+
+
+#############################################
+# Custom command for shaders\minimap_char_vert.glsl
+
+build shaders\minimap_char_vert.glsl: CUSTOM_COMMAND ..\..\..\shaders\minimap_char_vert.glsl
+  COMMAND = cmd.exe /C "cd /D "C:\Users\ricch\OneDrive\Desktop\Mauro\Uni\3D Computer Graphics and Animation\F_Project\out\build\x64-Debug" && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E copy "C:/Users/ricch/OneDrive/Desktop/Mauro/Uni/3D Computer Graphics and Animation/F_Project/shaders/minimap_char_vert.glsl" "C:/Users/ricch/OneDrive/Desktop/Mauro/Uni/3D Computer Graphics and Animation/F_Project/out/build/x64-Debug/shaders/minimap_char_vert.glsl""
+  DESC = Generating shaders/minimap_char_vert.glsl
   restat = 1
 
 

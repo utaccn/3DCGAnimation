@@ -58,7 +58,9 @@
 				13,
 				14,
 				15,
-				16
+				16,
+				17,
+				18
 			]
 		}
 	],
@@ -86,6 +88,18 @@
 			"backtrace" : 0,
 			"isGenerated" : true,
 			"path" : "out/build/x64-Debug/shaders/floor_vert.glsl.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/shaders/minimap_char_frag.glsl.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/shaders/minimap_char_vert.glsl.rule",
 			"sourceGroupIndex" : 1
 		},
 		{

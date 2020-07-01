@@ -148,6 +148,11 @@ public:
             miniBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/minimap_frag.glsl");
             minimapShader = miniBuilder.build();
 
+            ShaderBuilder minicharBuilder;
+            minicharBuilder.addStage(GL_VERTEX_SHADER, "shaders/minimap_char_vert.glsl");
+            minicharBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/minimap_char_frag.glsl");
+            minimapCharShader = minicharBuilder.build();
+
         } catch (ShaderLoadingException e) {
             std::cerr << e.what() << std::endl;
         }
@@ -226,15 +231,7 @@ public:
             glBindTexture(GL_TEXTURE_2D, texShadow);
             glUniform1i(8, texture_unit);
             environment.draw();
-            
-            if (firstPerson == false) {
-                glm::vec3 newCameraPos = glm::vec3(2., 1., 2.);
-                glm::mat4 lucAt = glm::lookAt(newCameraPos, glm::vec3(0., 0., 0.), glm::vec3(0, 1, 0));
-                const glm::mat4 mvpMMatrix = m_projectionMatrix * lucAt * m_modelMatrix;
-                glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMMatrix));
-                m_mesh.draw();
-            }
-            else { m_mesh.draw(); }
+
             if (x_shader == 0) {
                 trees_headShader.bind();
             }
@@ -286,7 +283,15 @@ public:
             glUniform3fv(3, 1, glm::value_ptr(cameraLight.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(minimapCamera.cameraPos()));
             robot.draw();
+
+            //Character rendering on the minimap
+            minimapCharShader.bind();
+            const glm::mat4 mvpMatrixChar = m_projectionMatrix * minimapCamera.viewMatrix() * m_modelMatrix;
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrixChar));
+            m_mesh.draw();
+            
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            //End minimap rendering
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glViewport(0, 0, 1024, 1024);
             if (x_shader == 0) {
@@ -473,6 +478,7 @@ private:
     Shader trees_headShader;
     Shader trunkShader;
     Shader minimapShader;
+    Shader minimapCharShader;
 
     int x_shader = 0;
     int firstPerson = true;
