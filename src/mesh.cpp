@@ -14,19 +14,26 @@ DISABLE_WARNINGS_POP()
 #include <iostream>
 #include <stack>
 #include <vector>
+#include <Eigen/Dense>
+#include <fstream>
+
+using namespace std;
+using namespace Eigen;
 
 static glm::mat4 assimpMatrix(const aiMatrix4x4& m);
 static glm::vec3 assimpVec(const aiVector3D& v);
+static const aiScene* scene;
+static Assimp::Importer importer;
 
 Mesh::Mesh(std::filesystem::path filePath)
 {
     if (!std::filesystem::exists(filePath))
         throw MeshLoadingException(fmt::format("File {} does not exist", filePath.string().c_str()));
 
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(filePath.string().data(), aiProcess_GenSmoothNormals | aiProcess_Triangulate);
-
-    if (scene == nullptr || scene->mRootNode == nullptr || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE) {
+    scene = importer.ReadFile(filePath.string().data(), aiProcess_GenSmoothNormals | aiProcess_Triangulate);
+    bool Ret = false;
+    
+    if (scene == nullptr || scene->mRootNode == nullptr /*|| scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE*/) {
         throw MeshLoadingException(fmt::format("Assimp failed to load mesh file {}", filePath.string().c_str()));
     }
 
@@ -35,6 +42,13 @@ Mesh::Mesh(std::filesystem::path filePath)
 
     std::stack<std::tuple<aiNode*, glm::mat4>> stack;
     stack.push({ scene->mRootNode, assimpMatrix(scene->mRootNode->mTransformation) });
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //if(scene->mMeshes[0]->HasBones())
+    std::cout << "Mesh: " << scene->mMeshes[0]->mName.data << " Stack: " << stack.size() << std::endl;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     while (!stack.empty()) {
         auto [node, matrix] = stack.top();
         stack.pop();
@@ -45,7 +59,7 @@ Mesh::Mesh(std::filesystem::path filePath)
         for (unsigned i = 0; i < node->mNumMeshes; i++) {
             // Process subMesh
             const aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-
+            
             if (mesh->mNumVertices == 0 || mesh->mNumFaces == 0)
                 std::cerr << "Empty mesh encountered" << std::endl;
 
@@ -56,7 +70,6 @@ Mesh::Mesh(std::filesystem::path filePath)
                 if (face.mNumIndices != 3) {
                     std::cerr << "Found a face which is not a triangle, discarding!" << std::endl;
                 }
-
                 auto aiIndices = face.mIndices;
                 indices.push_back(static_cast<unsigned>(aiIndices[0] + indexOffset));
                 indices.push_back(static_cast<unsigned>(aiIndices[1] + indexOffset));
@@ -80,6 +93,7 @@ Mesh::Mesh(std::filesystem::path filePath)
             stack.push({ node->mChildren[i], matrix });
         }
     }
+    //std::cout << "Vertices: " << vertices.size() << " Indices: " << indices.size() << std::endl;
     importer.FreeScene();
 
     // Create Element(/Index) Buffer Objects and Vertex Buffer Object.
@@ -190,6 +204,19 @@ static glm::vec3 assimpVec(const aiVector3D& v)
 {
     return glm::vec3(v.x, v.y, v.z);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
 
 /*#include "Model.h"
 #include <fstream>

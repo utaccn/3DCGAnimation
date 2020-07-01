@@ -16,7 +16,16 @@ struct Vertex {
     glm::vec3 pos;
     glm::vec3 normal;
     glm::vec2 texCoord;
+    int boneIDs[4];
+    int boneWeights[4];
 };
+
+struct VertexBoneData
+{
+    int IDs[4];
+    float Weights[4];
+};
+
 class Mesh {
 public:
     Mesh(std::filesystem::path filePath);
@@ -35,6 +44,8 @@ public:
 private:
     void moveInto(Mesh&&);
     void freeGpuMemory();
+
+    //void LoadBones(int MeshIndex, const aiMesh* pMesh, vector<int> Bones);
 
 private:
     static constexpr GLuint INVALID = 0xFFFFFFFF;

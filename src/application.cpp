@@ -26,6 +26,7 @@ public:
     Application()
         : m_window(glm::ivec2(1024, 1024), "Final Project", false)
         , m_mesh("resources/dragon.obj")
+        , test("resources/attempt.dae")
         , robot("resources/RIGING_MODEL_04.obj")
         , environment("resources/only_houses.obj")
         , just_floor("resources/floor.obj")
@@ -36,7 +37,7 @@ public:
         , grass("resources/grass1.png")
         , m_camera { &m_window, glm::vec3(2.f, 2.0f, -2.f), -glm::vec3(2.f, 2.0f, -2.f) }//glm::vec3(1.f, 1.0f, 1.f), -glm::vec3(1.f, 1.f,1.f) }
         , cameraLight { &m_window, glm::vec3(30.f, 30.0f, -14.f), -glm::vec3(30.f, 30.0f, -14.f) }//glm::vec3(7.f, 13.0f, -18.f), -glm::vec3(7.f, 13.0f, -18.f) }
-
+        
     {
         m_camera.setUserInteraction(true);
         cameraLight.setUserInteraction(false);
@@ -148,6 +149,7 @@ public:
                 m_mesh.draw();
                 trees_head.draw();
                 trunks.draw();
+                test.draw();
                 //Move model matrix to render shadow map for robot model
                 const glm::mat4 robotmodelMatrix = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
                 const glm::mat4 robotlightmvp = m_projectionMatrix * cameraLight.viewMatrix() *robotmodelMatrix;
@@ -347,6 +349,7 @@ private:
     Mesh just_floor;
     Mesh trees_head;
     Mesh trunks;
+    Mesh test;
 
     Texture m_texture;
     Texture texToon;
@@ -357,7 +360,7 @@ private:
     glm::mat4 m_projectionMatrix = glm::perspective(glm::pi<float>() / 4.0f, 1.0f, 0.1f, 500.0f);  
     glm::mat4 m_viewMatrix = glm::lookAt(glm::vec3(-1, 1, -1), glm::vec3(0), glm::vec3(0, 1, 0));
     glm::mat4 m_modelMatrix { 1.0f };
-
+  
 
 };
 

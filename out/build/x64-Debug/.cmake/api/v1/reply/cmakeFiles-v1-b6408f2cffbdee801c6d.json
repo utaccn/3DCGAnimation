@@ -1,0 +1,277 @@
+{
+	"inputs" : 
+	[
+		{
+			"path" : "CMakeLists.txt"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/CMakeFiles/3.17.20032601-MSVC_2/CMakeSystem.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/CMakeSystemSpecificInitialize.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/CMakeFiles/3.17.20032601-MSVC_2/CMakeCXXCompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/CMakeSystemSpecificInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/CMakeGenericSystem.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/CMakeInitializeConfigs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/Platform/Windows.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/Platform/WindowsPaths.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/CMakeCXXInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/CMakeLanguageInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/Compiler/MSVC-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/Platform/Windows-MSVC-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/Platform/Windows-MSVC.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/CMakeFiles/3.17.20032601-MSVC_2/CMakeRCCompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/CMakeRCInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/CMakeCommonLanguageInclude.cmake"
+		},
+		{
+			"path" : "cmake/CompilerWarnings.cmake"
+		},
+		{
+			"path" : "cmake/Sanitizers.cmake"
+		},
+		{
+			"path" : "cmake/StaticAnalyzers.cmake"
+		},
+		{
+			"path" : "cmake/pmm.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/_pmm/1.4.2/entry.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/_pmm/1.4.2/util.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/_pmm/1.4.2/python.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/_pmm/1.4.2/conan.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/_pmm/1.4.2/vcpkg.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/_pmm/1.4.2/cmcm.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/_pmm/1.4.2/main.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/_pmm/1.4.2/dds.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/_pmm/1.4.2/latest-info.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/scripts/buildsystems/vcpkg.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/FindOpenGL.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/glew/vcpkg-cmake-wrapper.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.17/Modules/SelectLibraryConfigurations.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/glew/glew-config.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/glew/glew-targets.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/glew/glew-targets-debug.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/glew/glew-targets-release.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/glew/CopyImportedTargetProperties.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/glfw3/glfw3ConfigVersion.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/glfw3/glfw3Config.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/glfw3/glfw3Targets.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/glfw3/glfw3Targets-debug.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/glfw3/glfw3Targets-release.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/glm/glm-config.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/Microsoft.GSL/Microsoft.GSLConfig.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/fmt/fmt-config-version.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/fmt/fmt-config.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/fmt/fmt-targets.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/fmt/fmt-targets-debug.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/fmt/fmt-targets-release.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/assimp/assimp-config-version.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/assimp/assimp-config.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/assimp/assimpTargets.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/assimp/assimpTargets-debug.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/share/assimp/assimpTargets-release.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/Desktop/Master_Delft/3D_Computer_Graphics_and_Animation/eigen/build/Eigen3ConfigVersion.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/Desktop/Master_Delft/3D_Computer_Graphics_and_Animation/eigen/build/Eigen3Config.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "C:/Users/Reppas/Desktop/Master_Delft/3D_Computer_Graphics_and_Animation/eigen/build/Eigen3Targets.cmake"
+		}
+	],
+	"kind" : "cmakeFiles",
+	"paths" : 
+	{
+		"build" : "C:/Users/Reppas/Desktop/Master_Delft/3D_Computer_Graphics_and_Animation/Final Project 2/out/build/x64-Debug",
+		"source" : "C:/Users/Reppas/Desktop/Master_Delft/3D_Computer_Graphics_and_Animation/Final Project 2"
+	},
+	"version" : 
+	{
+		"major" : 1,
+		"minor" : 0
+	}
+}
