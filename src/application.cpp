@@ -21,7 +21,34 @@ DISABLE_WARNINGS_POP()
 #include <functional>
 #include <iostream>
 #include <vector>
+class quad {
+public:
+    quad() {
+        GLfloat vertices[] = { // format = x, y, z, u, v
+            -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,     1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+             1.0f,  1.0f, 0.0f,  1.0f, 1.0f,    -1.0f,  1.0f, 0.0f, 0.0f, 1.0f
+        };
+        glGenVertexArrays(1, &vao); // vao saves state of array buffer, element array, etc
+        glGenBuffers(1, &vbo); // vbo stores vertex data
+        GLint curr_vao; // original state
+        glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &curr_vao);
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, nullptr);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 3));
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glBindVertexArray(curr_vao);
+    }
 
+    ~quad() {
+        glDeleteVertexArrays(1, &vao);
+        glDeleteBuffers(1, &vbo);
+    }
+
+    GLuint vao, vbo;
+};
 class Application {
 public:
     Application()
@@ -35,9 +62,9 @@ public:
         , trunks("resources/trunks.obj")
         , texToon("resources/zio.jpg")
         , grass("resources/grass1.png")
-        , m_camera { &m_window, glm::vec3(2.f, 2.0f, -2.f), -glm::vec3(2.f, 2.0f, -2.f) }
+        , m_camera { &m_window, glm::vec3(2.,2.0f, -2.f), -glm::vec3(2.f, 2.0f, -2.f) }
         , cameraLight { &m_window, glm::vec3(30.f, 30.0f, -14.f), -glm::vec3(30.f, 30.0f, -14.f) }
-        , minimapCamera{ &m_window, glm::vec3(0.f, 20.0f, 0.f), -glm::vec3(0.f, 20.0f, 0.f) }
+        , minimapCamera{ &m_window, glm::vec3(1.f, 45.0f, 0.f), -glm::vec3(1.f,45.0f, 0.f) }
 
     {
         m_camera.setUserInteraction(true);
@@ -59,22 +86,16 @@ public:
 
         //MINIMAP
         glCreateTextures(GL_TEXTURE_2D, 1, &minimap);
-        glTextureStorage2D(minimap, 1, GL_DEPTH_COMPONENT32F, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
+        glBindTexture(GL_TEXTURE_2D, minimap);
         glTextureParameteri(minimap, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTextureParameteri(minimap, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTextureParameteri(minimap, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTextureParameteri(minimap, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
         glCreateFramebuffers(1, &framebuffo);
         glNamedFramebufferTexture(framebuffo, GL_COLOR_ATTACHMENT0, minimap, 0);
-        // Set the list of draw buffers.
-        GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-        glDrawBuffers(1, DrawBuffers); 
-        // The depth buffer
-        GLuint rbo;
-        glGenRenderbuffers(1, &rbo);
-        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, 1024, 1024);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rbo);
+
 
 
         m_window.registerKeyCallback([this](int key, int scancode, int action, int mods) {
@@ -143,15 +164,16 @@ public:
             std::cerr << e.what() << std::endl;
         }
         float vertexx[] = {
-             0.5f,  0.5f, 0.0f,  // top right
-             0.5f, -0.5f, 0.0f,  // bottom right
-            -0.5f, -0.5f, 0.0f,  // bottom left
-            -0.5f,  0.5f, 0.0f   // top left 
+             1.f,  1.f, 0.0f,  // top right
+             1.f, -1.f, 0.0f,  // bottom right
+            -1.f, -1.f, 0.0f,  // bottom left
+            -1.f,  1.f, 0.0f   // top left 
         };
         unsigned int indices[] = {  // note that we start from 0!
     0, 1, 3,   // first triangle
     1, 2, 3    // second triangle
         };
+
 
         glGenVertexArrays(1, &VAOO);
         glGenBuffers(1, &VBOO);
@@ -212,10 +234,9 @@ public:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glDisable(GL_CULL_FACE);
             glEnable(GL_DEPTH_TEST);
-
             glBindFramebuffer(GL_FRAMEBUFFER, framebuffo);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glViewport(0, 0, 1024, 1024);
+            glViewport(0, 0, 256, 256);
             if (x_shader == 0){
                 m_defaultShader.bind();
             }
@@ -223,18 +244,13 @@ public:
                 x_ray.bind();
                 texToon.bind(GL_TEXTURE1);
                 glUniform1i(10, 1);
-            }
-           
-            
+            }     
             const glm::mat3 normalModelMatrix = glm::inverseTranspose(glm::mat3(m_modelMatrix));
-            const glm::mat4 mvpMatrix = m_projectionMatrix * m_camera.viewMatrix()* m_modelMatrix;
+            const glm::mat4 mvpMatrix = m_projectionMatrix * minimapCamera.viewMatrix()* m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
-            //Don't know if this should go here <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-            //glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(m_modelMatrix));
-            //glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(normalModelMatrix));
             const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix(); // Assume model matrix is identity.
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
-            glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
+            glUniform3fv(5, 1, glm::value_ptr(minimapCamera.cameraPos()));
             const glm::vec3 lightPos = cameraLight.cameraPos();
             glUniform3fv(4, 1, glm::value_ptr(lightPos));
 
@@ -243,23 +259,10 @@ public:
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texShadow);
             glUniform1i(8, texture_unit);
-            //glViewport(0, 0, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
-            /*
-            // Clear the framebuffer to black and depth to maximum value
-            glClearDepth(1.0f);
-            glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glDisable(GL_CULL_FACE);
-            glEnable(GL_DEPTH_TEST); */
-
             environment.draw();
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            
             if (firstPerson == false) {
                 glm::vec3 newCameraPos = glm::vec3(2., 1., 2.);
-                /*glm::vec3 charPos = m_camera.cameraPos() + glm::vec3(3.0) * (m_camera.getTarget() - m_camera.cameraPos());
-                glm::mat4 charLocation = glm::translate(m_modelMatrix, charPos);
-                const glm::mat4 mvpMMatrix = m_projectionMatrix * m_camera.viewMatrix() * charLocation;
-                glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMMatrix));*/
                 glm::mat4 lucAt = glm::lookAt(newCameraPos, glm::vec3(0., 0., 0.), glm::vec3(0, 1, 0));
                 const glm::mat4 mvpMMatrix = m_projectionMatrix * lucAt * m_modelMatrix;
                 glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMMatrix));
@@ -276,7 +279,7 @@ public:
             }
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
-            glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
+            glUniform3fv(5, 1, glm::value_ptr(minimapCamera.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
             glUniform1i(8, 0);
             trees_head.draw();
@@ -291,20 +294,20 @@ public:
             }
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
-            glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
+            glUniform3fv(5, 1, glm::value_ptr(minimapCamera.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
             glUniform1i(8, 0);
             trunks.draw();
-
+            
             floorShader.bind();
           //  if (just_floor.hasTextureCoords()) {
                 grass.bind(GL_TEXTURE2);
                 glUniform1i(9, 2);
             //}
-                const glm::mat4 mvpMatrixF = m_projectionMatrix * m_camera.viewMatrix()* m_modelMatrix;
+                const glm::mat4 mvpMatrixF = m_projectionMatrix * minimapCamera.viewMatrix()* m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrixF));
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix* cameraLight.viewMatrix()));
-            glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
+            glUniform3fv(5, 1, glm::value_ptr(minimapCamera.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
             just_floor.draw();
             
@@ -312,28 +315,130 @@ public:
             toonShader.bind();
             const glm::mat4 robotmodelMatrix = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
             const glm::mat3 robotNormalModelMatrix = glm::inverseTranspose(glm::mat3(robotmodelMatrix));
-            const glm::mat4 robotmvpMatrix = m_projectionMatrix * m_camera.viewMatrix() * robotmodelMatrix;
+            const glm::mat4 robotmvpMatrix = m_projectionMatrix * minimapCamera.viewMatrix() * robotmodelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(robotmvpMatrix));
             glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(robotmodelMatrix));
             glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(robotNormalModelMatrix));
             glUniform3fv(3, 1, glm::value_ptr(cameraLight.cameraPos()));
+            glUniform3fv(4, 1, glm::value_ptr(minimapCamera.cameraPos()));
+            robot.draw();
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glViewport(0, 0, 1024, 1024);
+            if (x_shader == 0) {
+                m_defaultShader.bind();
+            }
+            else {
+                x_ray.bind();
+                texToon.bind(GL_TEXTURE1);
+                glUniform1i(10, 1);
+            }
+
+
+            const glm::mat3 normalModelMatrix1 = glm::inverseTranspose(glm::mat3(m_modelMatrix));
+            const glm::mat4 mvpMatrix1 = m_projectionMatrix * m_camera.viewMatrix() * m_modelMatrix;
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix1));
+            const glm::mat4 lightmvp1 = m_projectionMatrix * cameraLight.viewMatrix(); // Assume model matrix is identity.
+            glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp1));
+            glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
+            const glm::vec3 lightPos1 = cameraLight.cameraPos();
+            glUniform3fv(4, 1, glm::value_ptr(lightPos1));
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, texShadow);
+            glUniform1i(8, 0);
+            environment.draw();
+
+            if (firstPerson == false) {
+                glm::vec3 newCameraPos = glm::vec3(2., 1., 2.);
+                glm::mat4 lucAt1 = glm::lookAt(newCameraPos, glm::vec3(0., 0., 0.), glm::vec3(0, 1, 0));
+                const glm::mat4 mvpMMatrix = m_projectionMatrix * lucAt1 * m_modelMatrix;
+                glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMMatrix));
+                m_mesh.draw();
+            }
+            else { m_mesh.draw(); }
+            if (x_shader == 0) {
+                trees_headShader.bind();
+            }
+            else {
+                x_ray.bind();
+                texToon.bind(GL_TEXTURE1);
+                glUniform1i(10, 1);
+            }
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix1));
+            glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
+            glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
+            glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
+            glUniform1i(8, 0);
+            trees_head.draw();
+
+            if (x_shader == 0) {
+                trunkShader.bind();
+            }
+            else {
+                x_ray.bind();
+                texToon.bind(GL_TEXTURE1);
+                glUniform1i(10, 1);
+            }
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix1));
+            glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
+            glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
+            glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
+            glUniform1i(8, 0);
+            trunks.draw();
+
+            floorShader.bind();
+            grass.bind(GL_TEXTURE2);
+            glUniform1i(9, 2);
+            //}
+            const glm::mat4 mvpMatrixF1 = m_projectionMatrix * m_camera.viewMatrix() * m_modelMatrix;
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrixF1));
+            glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
+            glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
+            glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
+            just_floor.draw();
+
+            //Robot model with Toon shading
+            toonShader.bind();
+            const glm::mat4 robotmodelMatrix1 = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
+            const glm::mat3 robotNormalModelMatrix1 = glm::inverseTranspose(glm::mat3(robotmodelMatrix));
+            const glm::mat4 robotmvpMatrix1 = m_projectionMatrix * m_camera.viewMatrix() * robotmodelMatrix;
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(robotmvpMatrix1));
+            glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(robotmodelMatrix1));
+            glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(robotNormalModelMatrix1));
+            glUniform3fv(3, 1, glm::value_ptr(cameraLight.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(m_camera.cameraPos()));
             robot.draw();
-           
 
+            glViewport(0, 0, 256, 256);
+            quad q;
+            minimapShader.bind();
+            glBindVertexArray(q.vao);
+            glActiveTexture(GL_TEXTURE3);
+            glBindTexture(GL_TEXTURE_2D, minimap);
+            glUniform1i(10, 3);
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+            /*
             //MINIMAP
             minimapShader.bind();
-            const glm::mat4 mvpMini = m_projectionMatrix * m_camera.viewMatrix() * m_modelMatrix; // Assume model matrix is identity.
+            const glm::mat4 mvpMini = m_projectionMatrix * m_camera.viewMatrix();// *m_modelMatrix; // Assume model matrix is identity.
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMini));
             glActiveTexture(GL_TEXTURE4);
             glBindTexture(GL_TEXTURE_2D, minimap);
             glUniform1i(10, 4);
             glBindVertexArray(VAOO);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);*/
 
             // Processes input and swaps the window buffer
             m_window.swapBuffers();
         }
+        glBindVertexArray(0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE0);
+
         glDeleteVertexArrays(1, &VAOO);
         glDeleteBuffers(1, &VBOO);
         glDeleteBuffers(1, &EBOO);
