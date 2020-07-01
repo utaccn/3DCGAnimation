@@ -67,36 +67,31 @@ public:
         , minimapCamera{ &m_window, glm::vec3(1.f, 45.0f, 0.f), -glm::vec3(1.f,45.0f, 0.f) }
 
     {
+        //Set Cameras interaction
         m_camera.setUserInteraction(true);
         cameraLight.setUserInteraction(false);
+        minimapCamera.setUserInteraction(false);
 
         // === Create Shadow Texture ===
-
         glCreateTextures(GL_TEXTURE_2D, 1, &texShadow);
         glTextureStorage2D(texShadow, 1, GL_DEPTH_COMPONENT32F, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
-        // Set behaviour for when texture coordinates are outside the [0, 1] range.
         glTextureParameteri(texShadow, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTextureParameteri(texShadow, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        // Set interpolation for texture sampling (GL_NEAREST for no interpolation).
         glTextureParameteri(texShadow, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTextureParameteri(texShadow, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        // === Create framebuffer for extra texture ===
         glCreateFramebuffers(1, &framebuffer);
         glNamedFramebufferTexture(framebuffer, GL_DEPTH_ATTACHMENT, texShadow, 0);
 
         //MINIMAP
         glCreateTextures(GL_TEXTURE_2D, 1, &minimap);
         glBindTexture(GL_TEXTURE_2D, minimap);
-        glTextureParameteri(minimap, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTextureParameteri(minimap, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(minimap, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTextureParameteri(minimap, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTextureParameteri(minimap, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTextureParameteri(minimap, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-        glBindTexture(GL_TEXTURE_2D, 0);
         glCreateFramebuffers(1, &framebuffo);
         glNamedFramebufferTexture(framebuffo, GL_COLOR_ATTACHMENT0, minimap, 0);
-
-
 
         m_window.registerKeyCallback([this](int key, int scancode, int action, int mods) {
             if (action == GLFW_PRESS)
@@ -153,42 +148,13 @@ public:
             miniBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/minimap_frag.glsl");
             minimapShader = miniBuilder.build();
 
-            // Any new shaders can be added below in similar fashion.
-            // ==> Don't forget to reconfigure CMake when you do!
-            //     Visual Studio: PROJECT => Generate Cache for ComputerGraphics
-            //     VS Code: ctrl + shift + p => CMake: Configure => enter
-            // ....
-
-
         } catch (ShaderLoadingException e) {
             std::cerr << e.what() << std::endl;
         }
-        float vertexx[] = {
-             1.f,  1.f, 0.0f,  // top right
-             1.f, -1.f, 0.0f,  // bottom right
-            -1.f, -1.f, 0.0f,  // bottom left
-            -1.f,  1.f, 0.0f   // top left 
-        };
-        unsigned int indices[] = {  // note that we start from 0!
-    0, 1, 3,   // first triangle
-    1, 2, 3    // second triangle
-        };
 
-
-        glGenVertexArrays(1, &VAOO);
-        glGenBuffers(1, &VBOO);
-        glGenBuffers(1, &EBOO);
-        glBindVertexArray(VAOO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBOO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertexx), vertexx, GL_STATIC_DRAW);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
 
     }
     unsigned int fbo;
-    unsigned int VAOO, VBOO, EBOO;
 
     GLuint framebuffer;
     GLuint texShadow;
@@ -300,10 +266,8 @@ public:
             trunks.draw();
             
             floorShader.bind();
-          //  if (just_floor.hasTextureCoords()) {
                 grass.bind(GL_TEXTURE2);
                 glUniform1i(9, 2);
-            //}
                 const glm::mat4 mvpMatrixF = m_projectionMatrix * minimapCamera.viewMatrix()* m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrixF));
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix* cameraLight.viewMatrix()));
@@ -323,8 +287,7 @@ public:
             glUniform3fv(4, 1, glm::value_ptr(minimapCamera.cameraPos()));
             robot.draw();
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glViewport(0, 0, 1024, 1024);
             if (x_shader == 0) {
                 m_defaultShader.bind();
@@ -334,8 +297,6 @@ public:
                 texToon.bind(GL_TEXTURE1);
                 glUniform1i(10, 1);
             }
-
-
             const glm::mat3 normalModelMatrix1 = glm::inverseTranspose(glm::mat3(m_modelMatrix));
             const glm::mat4 mvpMatrix1 = m_projectionMatrix * m_camera.viewMatrix() * m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix1));
@@ -410,27 +371,20 @@ public:
             glUniform3fv(4, 1, glm::value_ptr(m_camera.cameraPos()));
             robot.draw();
 
-            glViewport(0, 0, 256, 256);
-            quad q;
-            minimapShader.bind();
-            glBindVertexArray(q.vao);
-            glActiveTexture(GL_TEXTURE3);
-            glBindTexture(GL_TEXTURE_2D, minimap);
-            glUniform1i(10, 3);
-            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-            /*
-            //MINIMAP
-            minimapShader.bind();
-            const glm::mat4 mvpMini = m_projectionMatrix * m_camera.viewMatrix();// *m_modelMatrix; // Assume model matrix is identity.
-            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMini));
-            glActiveTexture(GL_TEXTURE4);
-            glBindTexture(GL_TEXTURE_2D, minimap);
-            glUniform1i(10, 4);
-            glBindVertexArray(VAOO);
-
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);*/
+            //Draw Minimap pressing 2
+            if (minimapSwitch == 0) {
+                glEnable(GL_SCISSOR_TEST);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                glScissor(0, 0, 256, 256);
+                quad q;
+                minimapShader.bind();
+                glBindVertexArray(q.vao);
+                glActiveTexture(GL_TEXTURE3);
+                glBindTexture(GL_TEXTURE_2D, minimap);
+                glUniform1i(10, 3);
+                glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+                glDisable(GL_SCISSOR_TEST);
+            }
 
             // Processes input and swaps the window buffer
             m_window.swapBuffers();
@@ -438,10 +392,6 @@ public:
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, 0);
         glActiveTexture(GL_TEXTURE0);
-
-        glDeleteVertexArrays(1, &VAOO);
-        glDeleteBuffers(1, &VBOO);
-        glDeleteBuffers(1, &EBOO);
         glDeleteFramebuffers(1, &framebuffer);
         glDeleteFramebuffers(1, &framebuffo);
         glDeleteTextures(1, &texShadow);
@@ -466,7 +416,12 @@ public:
         else if (key == 49 && firstPerson == false) {
             firstPerson = true;
         }
-
+        if (key == 50 && minimapSwitch == true) {
+            minimapSwitch = false;
+        }
+        else if (key == 50 && minimapSwitch == false) {
+            minimapSwitch = true;
+        }
         std::cout << "Key pressed: " << key << std::endl;
            return key;
     }
@@ -491,8 +446,6 @@ public:
     void onMouseClicked(int button, int mods)
     {
         std::cout << "cameraX:" << m_camera.cameraPos().x << "cameraY:" << m_camera.cameraPos().y << "cameraZ:" << m_camera.cameraPos().z << std::endl;
-        m_camera.setUserInteraction(true);
-        cameraLight.setUserInteraction(false);
         std::cout << "Pressed mouse button: " << button << std::endl;
        
     }
@@ -523,6 +476,7 @@ private:
 
     int x_shader = 0;
     int firstPerson = true;
+    int minimapSwitch = true;
 
     Mesh robot;
     Mesh m_mesh;
