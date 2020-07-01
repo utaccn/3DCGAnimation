@@ -26,13 +26,13 @@ public:
     Application()
         : m_window(glm::ivec2(1024, 1024), "Final Project", false)
         , m_mesh("resources/dragon.obj")
-        , test("resources/attempt.dae")
         , robot("resources/RIGING_MODEL_04.obj")
         , environment("resources/only_houses.obj")
         , just_floor("resources/floor.obj")
         , m_texture("resources/checkerboard.png")
         , trees_head("resources/trees_head.obj")
         , trunks("resources/trunks.obj")
+        , test("resources/attempt.dae")
         , texToon("resources/zio.jpg")
         , grass("resources/grass1.png")
         , m_camera { &m_window, glm::vec3(2.f, 2.0f, -2.f), -glm::vec3(2.f, 2.0f, -2.f) }//glm::vec3(1.f, 1.0f, 1.f), -glm::vec3(1.f, 1.f,1.f) }
@@ -115,11 +115,9 @@ public:
             //     VS Code: ctrl + shift + p => CMake: Configure => enter
             // ....
 
-
         } catch (ShaderLoadingException e) {
             std::cerr << e.what() << std::endl;
         }
-
     }
 
     GLuint framebuffer;
@@ -196,6 +194,7 @@ public:
             glEnable(GL_DEPTH_TEST);
 
             environment.draw();
+            test.draw();
             if (firstPerson == false) {
                 glm::vec3 newCameraPos = glm::vec3(2., 1., 2.);
                 /*glm::vec3 charPos = m_camera.cameraPos() + glm::vec3(3.0) * (m_camera.getTarget() - m_camera.cameraPos());

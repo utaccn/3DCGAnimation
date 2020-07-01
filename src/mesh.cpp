@@ -44,7 +44,7 @@ Mesh::Mesh(std::filesystem::path filePath)
     stack.push({ scene->mRootNode, assimpMatrix(scene->mRootNode->mTransformation) });
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //if(scene->mMeshes[0]->HasBones())
+
     std::cout << "Mesh: " << scene->mMeshes[0]->mName.data << " Stack: " << stack.size() << std::endl;
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +93,13 @@ Mesh::Mesh(std::filesystem::path filePath)
             stack.push({ node->mChildren[i], matrix });
         }
     }
-    //std::cout << "Vertices: " << vertices.size() << " Indices: " << indices.size() << std::endl;
+
+
+
+    std::cout << "Mesh: " << scene->mMeshes[0]->mName.data << " Vertices: " << vertices.size() << " Indices: " << indices.size() << std::endl;
+    
+    
+    
     importer.FreeScene();
 
     // Create Element(/Index) Buffer Objects and Vertex Buffer Object.
