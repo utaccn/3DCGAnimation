@@ -403,9 +403,6 @@ public:
             toonShader.bind();
             if (x_shader == 0) {
                 toonShader.bind();
-                glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, texShadow);
-                glUniform1i(8, 0);
             }
             else {
                 x_ray.bind();
