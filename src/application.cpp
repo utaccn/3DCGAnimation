@@ -93,6 +93,16 @@ public:
         glCreateFramebuffers(1, &framebuffo);
         glNamedFramebufferTexture(framebuffo, GL_COLOR_ATTACHMENT0, minimap, 0);
 
+        //Create x-ray texture
+        glCreateTextures(GL_TEXTURE_2D, 1, &xraytex);
+        glTextureStorage2D(xraytex, 1, GL_DEPTH_COMPONENT32F, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
+        glTextureParameteri(xraytex, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(xraytex, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(xraytex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTextureParameteri(xraytex, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glCreateFramebuffers(1, &xraybuffer);
+        glNamedFramebufferTexture(xraybuffer, GL_DEPTH_ATTACHMENT, xraytex, 0);
+
         m_window.registerKeyCallback([this](int key, int scancode, int action, int mods) {
             if (action == GLFW_PRESS)
                 onKeyPressed(key, mods);
@@ -161,8 +171,10 @@ public:
     }
     unsigned int fbo;
 
+    GLuint xraybuffer;
     GLuint framebuffer;
     GLuint texShadow;
+    GLuint xraytex;
     GLuint framebuffo;
     GLuint minimap;
     const int SHADOWTEX_WIDTH = 1024;
@@ -293,16 +305,15 @@ public:
             
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             //End minimap rendering
+
+            //Start x-ray depth rendering
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glBindFramebuffer(GL_FRAMEBUFFER, xraybuffer);
+            glClearDepth(1.0f);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            glEnable(GL_DEPTH_TEST);
             glViewport(0, 0, 1024, 1024);
-            if (x_shader == 0) {
                 m_defaultShader.bind();
-            }
-            else {
-                x_ray.bind();
-                texToon.bind(GL_TEXTURE1);
-                glUniform1i(10, 1);
-            }
             const glm::mat3 normalModelMatrix1 = glm::inverseTranspose(glm::mat3(m_modelMatrix));
             const glm::mat4 mvpMatrix1 = m_projectionMatrix * m_camera.viewMatrix() * m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix1));
@@ -315,6 +326,31 @@ public:
             glBindTexture(GL_TEXTURE_2D, texShadow);
             glUniform1i(8, 0);
             environment.draw();
+            trunks.draw();
+            trees_head.draw();
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            //End x-ray depth rendering
+            glViewport(0, 0, 1024, 1024);
+
+            if (x_shader == 0) {
+                m_defaultShader.bind();
+            }
+            else {
+                x_ray.bind();
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, xraytex);
+                glUniform1i(8, 0);
+                texToon.bind(GL_TEXTURE1);
+                glUniform1i(10, 1);
+            }
+            const glm::mat4 mvpMatrix11 = m_projectionMatrix * m_camera.viewMatrix() * m_modelMatrix;
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix11));
+            glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
+            glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
+            glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
+            environment.draw();
 /*
             if (firstPerson == false) {
                 glm::vec3 newCameraPos = glm::vec3(2., 1., 2.);
@@ -326,9 +362,15 @@ public:
             else { m_mesh.draw(); } */
             if (x_shader == 0) {
                 trees_headShader.bind();
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, texShadow);
+                glUniform1i(8, 0);
             }
             else {
                 x_ray.bind();
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, xraytex);
+                glUniform1i(8, 0);
                 texToon.bind(GL_TEXTURE1);
                 glUniform1i(10, 1);
             }
@@ -336,11 +378,13 @@ public:
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
             glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
-            glUniform1i(8, 0);
             trees_head.draw();
 
             if (x_shader == 0) {
                 trunkShader.bind();
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, texShadow);
+                glUniform1i(8, 0);
             }
             else {
                 x_ray.bind();
@@ -351,7 +395,6 @@ public:
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
             glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
-            glUniform1i(8, 0);
             trunks.draw();
 
             floorShader.bind();
@@ -363,6 +406,9 @@ public:
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
             glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, texShadow);
+            glUniform1i(8, 0);
             just_floor.draw();
 
             //Robot model with Toon shading
@@ -379,6 +425,7 @@ public:
 
             if (firstPerson == false) {
                 glm::vec3 newCameraPos = glm::vec3(2., 1., 2.);
+                glm::mat4 newMModel = glm::translate(m_modelMatrix, glm::vec3(movex, 0.,0.));
                 glm::mat4 lucAt1 = glm::lookAt(newCameraPos, glm::vec3(0., 0., 0.), glm::vec3(0, 1, 0));
                 const glm::mat4 mvpMMatrix = m_projectionMatrix * lucAt1 * m_modelMatrix;
                 glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMMatrix));
@@ -439,6 +486,9 @@ public:
         }
         std::cout << "Key pressed: " << key << std::endl;
            return key;
+           if (key == 51) {
+               movex += 1;
+           }
     }
 
     // In here you can handle key releases
@@ -493,6 +543,7 @@ private:
     int x_shader = 0;
     int firstPerson = true;
     int minimapSwitch = true;
+    float movex;
 
     Mesh robot;
     Mesh m_mesh;

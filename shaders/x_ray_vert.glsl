@@ -12,7 +12,7 @@ layout(location = 2) in vec2 texCoord;
 out vec3 fragPos;
 out vec3 fragNormal;
 out vec2 fragTexCoord;
-out vec4 fragLightCoord;
+out vec4 CameraCoord;
 
 void main()
 {
@@ -20,6 +20,6 @@ void main()
 
     fragPos = position;
     fragNormal = normal;
-    fragLightCoord =  lightMVP * vec4(fragPos, 1.0);
+    CameraCoord =  mvpMatrix * vec4(fragPos, 1.0);
     fragTexCoord = texCoord;
 }
