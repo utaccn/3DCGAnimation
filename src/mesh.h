@@ -56,6 +56,12 @@ private:
 
     aiMatrix4x4 BoneTransform(float TimeInSeconds, std::vector<aiMatrix4x4>& Transforms);
 
+    int FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
+
+    int FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
+
+    void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+
     void LoadBones(int MeshIndex);
 
     //void LoadBones(int MeshIndex, const aiMesh* pMesh, vector<int> Bones);

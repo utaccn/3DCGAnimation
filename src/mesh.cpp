@@ -238,6 +238,53 @@ aiMatrix4x4 Mesh::BoneTransform(float TimeInSeconds, std::vector<aiMatrix4x4>& T
         Transforms[i] = BoneInformation[i].FinalTransformation;
     }
 }
+int Mesh::FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+    assert(pNodeAnim->mNumRotationKeys > 0);
+
+    for (int i = 0; i < pNodeAnim->mNumRotationKeys - 1; i++) {
+        if (AnimationTime < (float)pNodeAnim->mRotationKeys[i + 1].mTime) {
+            return i;
+        }
+    }
+
+    assert(0);
+}
+
+int Mesh::FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+    assert(pNodeAnim->mNumScalingKeys > 0);
+
+    for (int i = 0; i < pNodeAnim->mNumScalingKeys - 1; i++) {
+        if (AnimationTime < (float)pNodeAnim->mScalingKeys[i + 1].mTime) {
+            return i;
+        }
+    }
+
+    assert(0);
+}
+
+
+void Mesh::CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+    // we need at least two values to interpolate...
+    if (pNodeAnim->mNumScalingKeys == 1) {
+        Out = pNodeAnim->mScalingKeys[0].mValue;
+        return;
+    }
+
+    int ScalingIndex = FindScaling(AnimationTime, pNodeAnim);
+    int NextScalingIndex = (ScalingIndex + 1);
+    assert(NextScalingIndex < pNodeAnim->mNumScalingKeys);
+    float DeltaTime = pNodeAnim->mScalingKeys[NextScalingIndex].mTime - pNodeAnim->mScalingKeys[ScalingIndex].mTime;
+    float Factor = (AnimationTime - (float)pNodeAnim->mScalingKeys[ScalingIndex].mTime) / DeltaTime;
+    assert(Factor >= 0.0f && Factor <= 1.0f);
+    const aiVector3D& StartScalingQ = pNodeAnim->mScalingKeys[ScalingIndex].mValue;
+    const aiVector3D& EndScalingQ = pNodeAnim->mScalingKeys[NextScalingIndex].mValue;
+    glm::lerp(Out, StartScalingQ, EndScalingQ, Factor);
+    Out = Out.Normalize();
+}
+
 void Mesh::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const aiMatrix4x4& ParentTransform)
 {
     std::string NodeName(pNode->mName.data);
@@ -246,21 +293,24 @@ void Mesh::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const aiM
 
     aiMatrix4x4 NodeTransformation(pNode->mTransformation);
 
+    const aiNodeAnim* pNodeAnim;
+
     for (int i = 0; i < pAnimation->mNumChannels;) {
-        const aiNodeAnim* pNodeAnim = //FindNodeAnim(pAnimation, NodeName);
-    
+        if (pAnimation->mChannels[0]->mNodeName.data == NodeName)
+            pNodeAnim = pAnimation->mChannels[0];
     }
+
 
     if (pNodeAnim) {
         // Interpolate scaling and generate scaling transformation matrix
-        aiVector3D Scaling;
+        /*aiVector3D Scaling;
         CalcInterpolatedScaling(Scaling, AnimationTime, pNodeAnim);
         aiMatrix4x4 ScalingM;
-        ScalingM.InitScaleTransform(Scaling.x, Scaling.y, Scaling.z);
+        ScalingM.InitScaleTransform(Scaling.x, Scaling.y, Scaling.z);*/
 
         // Interpolate rotation and generate rotation transformation matrix
         aiQuaternion RotationQ;
-        CalcInterpolatedRotation(RotationQ, AnimationTime, pNodeAnim);
+        Mesh::CalcInterpolatedRotation(RotationQ, AnimationTime, pNodeAnim);
         aiMatrix4x4 RotationM = aiMatrix4x4(RotationQ.GetMatrix());
 
         // Interpolate translation and generate translation transformation matrix
@@ -284,6 +334,27 @@ void Mesh::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const aiM
     for (int i = 0; i < pNode->mNumChildren; i++) {
         ReadNodeHeirarchy(AnimationTime, pNode->mChildren[i], GlobalTransformation);
     }
+}
+
+
+void Mesh::CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+    // we need at least two values to interpolate...
+    if (pNodeAnim->mNumRotationKeys == 1) {
+        Out = pNodeAnim->mRotationKeys[0].mValue;
+        return;
+    }
+
+    int RotationIndex = FindRotation(AnimationTime, pNodeAnim);
+    int NextRotationIndex = (RotationIndex + 1);
+    assert(NextRotationIndex < pNodeAnim->mNumRotationKeys);
+    float DeltaTime = pNodeAnim->mRotationKeys[NextRotationIndex].mTime - pNodeAnim->mRotationKeys[RotationIndex].mTime;
+    float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
+    assert(Factor >= 0.0f && Factor <= 1.0f);
+    const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
+    const aiQuaternion& EndRotationQ = pNodeAnim->mRotationKeys[NextRotationIndex].mValue;
+    aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
+    Out = Out.Normalize();
 }
 
 void Mesh::LoadBones(int MeshIndex)
