@@ -329,6 +329,7 @@ public:
                 m_defaultShader.bind();
                 wood.bind(GL_TEXTURE3);
                 glUniform1i(12, 3);
+                glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
             }
             else {
                 x_ray.bind();
@@ -341,7 +342,6 @@ public:
             }
             const glm::mat4 mvpMatrix11 = m_projectionMatrix * m_camera.viewMatrix() * m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix11));
-            glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
             glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
             environment.draw();
@@ -351,6 +351,7 @@ public:
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, texShadow);
                 glUniform1i(8, 0);
+                glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
             }
             else {
                 x_ray.bind();
@@ -362,7 +363,6 @@ public:
                 glUniform1f(20, radiusX);
             }
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix1));
-            glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
             glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
             trees_head.draw();
@@ -372,15 +372,18 @@ public:
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, texShadow);
                 glUniform1i(8, 0);
+                glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
             }
             else {
                 x_ray.bind();
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, xraytex);
+                glUniform1i(8, 0);
                 texToon.bind(GL_TEXTURE1);
                 glUniform1i(10, 1);
                 glUniform1f(20, radiusX);
             }
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix1));
-            glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
             glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
             trunks.draw();
@@ -403,12 +406,19 @@ public:
             toonShader.bind();
             if (x_shader == 0) {
                 toonShader.bind();
+                glUniform3fv(3, 1, glm::value_ptr(cameraLight.cameraPos()));
+                glUniform3fv(4, 1, glm::value_ptr(m_camera.cameraPos()));
             }
             else {
                 x_ray.bind();
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, xraytex);
+                glUniform1i(8, 0);
                 texToon.bind(GL_TEXTURE1);
                 glUniform1i(10, 1);
                 glUniform1f(20, radiusX);
+                glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
+                glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
             }
             const glm::mat4 robotmodelMatrix1 = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
             const glm::mat3 robotNormalModelMatrix1 = glm::inverseTranspose(glm::mat3(robotmodelMatrix));
@@ -416,8 +426,6 @@ public:
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(robotmvpMatrix1));
             glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(robotmodelMatrix1));
             glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(robotNormalModelMatrix1));
-            glUniform3fv(3, 1, glm::value_ptr(cameraLight.cameraPos()));
-            glUniform3fv(4, 1, glm::value_ptr(m_camera.cameraPos()));
             robot.draw();
 
             if (firstPerson == false) {
