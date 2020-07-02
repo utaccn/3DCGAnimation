@@ -7,6 +7,7 @@ layout(location = 4) uniform vec3 lightPos;
 // Global variables for lighting calculations.
 layout(location = 8) uniform sampler2D texDiscard;
 layout(location = 10) uniform sampler2D texToon;
+layout(location= 20) uniform float radiusX;
 
 
 in vec4 CameraCoord;
@@ -42,15 +43,12 @@ vec2 shadowMapCoord = cameraCoord.xy;
 	
 	//Discard a circle
 	float lecircle = pow(shadowMapCoord.x-0.5,2) + pow(shadowMapCoord.y-0.5,2);
-	if((shadowMapDepth2 > cameraDepth-bias)&&(lecircle < 0.05)){
-/*
-	if((shadowMapDepth2 > cameraDepth-bias)){*/
+	if((shadowMapDepth2 > cameraDepth-bias)&&(lecircle < radiusX)){
+
+	//if((shadowMapDepth2 > cameraDepth-bias)){
 		discard;
 	}
-
-	//X-toon
-	
 	float z_dist = gl_FragCoord.z/(gl_FragCoord.w*50);
-	//outColor = vec4(vec3(z_dist), 1.0);
 	outColor = vec4(lambert + texture(texToon, vec2(z_dist, specular)));
+	if(lecircle> radiusX) { outColor = vec4(lambert);}
 }

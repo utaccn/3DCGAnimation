@@ -344,6 +344,7 @@ public:
                 glUniform1i(8, 0);
                 texToon.bind(GL_TEXTURE1);
                 glUniform1i(10, 1);
+                glUniform1f(20, radiusX);
             }
             const glm::mat4 mvpMatrix11 = m_projectionMatrix * m_camera.viewMatrix() * m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix11));
@@ -373,6 +374,7 @@ public:
                 glUniform1i(8, 0);
                 texToon.bind(GL_TEXTURE1);
                 glUniform1i(10, 1);
+                glUniform1f(20, radiusX);
             }
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix1));
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
@@ -390,6 +392,7 @@ public:
                 x_ray.bind();
                 texToon.bind(GL_TEXTURE1);
                 glUniform1i(10, 1);
+                glUniform1f(20, radiusX);
             }
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix1));
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
@@ -425,7 +428,6 @@ public:
 
             if (firstPerson == false) {
                 glm::vec3 newCameraPos = glm::vec3(2., 1., 2.);
-                glm::mat4 newMModel = glm::translate(m_modelMatrix, glm::vec3(movex, 0.,0.));
                 glm::mat4 lucAt1 = glm::lookAt(newCameraPos, glm::vec3(0., 0., 0.), glm::vec3(0, 1, 0));
                 const glm::mat4 mvpMMatrix = m_projectionMatrix * lucAt1 * m_modelMatrix;
                 glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMMatrix));
@@ -484,11 +486,15 @@ public:
         else if (key == 50 && minimapSwitch == false) {
             minimapSwitch = true;
         }
+        if (key == 67) {
+            radiusX += 0.01;
+        }
+        if (key == 86) {
+            radiusX -= 0.01;
+        }
         std::cout << "Key pressed: " << key << std::endl;
            return key;
-           if (key == 51) {
-               movex += 1;
-           }
+
     }
 
     // In here you can handle key releases
@@ -543,7 +549,7 @@ private:
     int x_shader = 0;
     int firstPerson = true;
     int minimapSwitch = true;
-    float movex;
+    float radiusX = 0.01;
 
     Mesh robot;
     Mesh m_mesh;
