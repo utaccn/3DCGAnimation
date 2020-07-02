@@ -7,6 +7,7 @@ DISABLE_WARNINGS_PUSH()
 DISABLE_WARNINGS_POP()
 #include <exception>
 #include <filesystem>
+#include <map>
 
 struct MeshLoadingException : public std::runtime_error {
     using std::runtime_error::runtime_error;
@@ -44,6 +45,8 @@ public:
 private:
     void moveInto(Mesh&&);
     void freeGpuMemory();
+
+    void LoadBones(int MeshIndex);
 
     //void LoadBones(int MeshIndex, const aiMesh* pMesh, vector<int> Bones);
 

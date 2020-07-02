@@ -13,12 +13,14 @@ DISABLE_WARNINGS_PUSH()
 DISABLE_WARNINGS_POP()
 #include <iostream>
 #include <stack>
-#include <vector>
 
 static glm::mat4 assimpMatrix(const aiMatrix4x4& m);
 static glm::vec3 assimpVec(const aiVector3D& v);
 static const aiScene* scene;
 static Assimp::Importer importer;
+
+std::vector<VertexBoneData> Bones;
+std::map<std::string, int> m_BoneMapping;
 
 Mesh::Mesh(std::filesystem::path filePath)
 {
@@ -34,8 +36,6 @@ Mesh::Mesh(std::filesystem::path filePath)
 
     std::vector<Vertex> vertices;
     std::vector<unsigned> indices;
-    std::vector<VertexBoneData> Bones;
-
     std::stack<std::tuple<aiNode*, glm::mat4>> stack;
     stack.push({ scene->mRootNode, assimpMatrix(scene->mRootNode->mTransformation) });
 
@@ -123,12 +123,16 @@ Mesh::Mesh(std::filesystem::path filePath)
     glVertexArrayVertexBuffer(m_vao, 1, m_vbo, offsetof(Vertex, normal), sizeof(Vertex));
     glVertexArrayVertexBuffer(m_vao, 2, m_vbo, offsetof(Vertex, texCoord), sizeof(Vertex));
     // Bones
+    //glVertexArrayVertexBuffer(m_vao, 3, m_vbo, offsetof(Bones, /*???*/), sizeof(int));
     // Weights
+    //glVertexArrayVertexBuffer(m_vao, 2, m_vbo, offsetof(Vertex, /*???*/), sizeof(float));
     glEnableVertexArrayAttrib(m_vao, 0);
     glEnableVertexArrayAttrib(m_vao, 1);
     glEnableVertexArrayAttrib(m_vao, 2);
     // Bones
+    //glEnableVertexArrayAttrib(m_vao, 3);
     // Weights
+    //glEnableVertexArrayAttrib(m_vao, 4);
     m_numIndices = static_cast<GLsizei>(indices.size());
 }
 
@@ -216,7 +220,44 @@ static glm::vec3 assimpVec(const aiVector3D& v)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+void Mesh::LoadBones(int MeshIndex)
+{
+    const aiMesh* pMesh = scene->mMeshes[0];
+    for (int i = 0; i <  pMesh->mNumBones; i++) {
+        int BoneIndex = 0;
+        std::string BoneName(pMesh->mBones[i]->mName.data);
+        
+        if (m_BoneMapping.find(BoneName) == m_BoneMapping.end()) {
+            BoneIndex = m_BoneMapping.size();
 
+            //m_NumBones++;
+            //BoneInfo bi;
+            //m_BoneInfo.push_back(bi);
+            
+            m_BoneMapping.insert(std::pair<std::string, int>(BoneName, BoneIndex));
+        }
+        else {
+            BoneIndex = m_BoneMapping[BoneName];
+        }
+                
+        //m_BoneInfo[BoneIndex].BoneOffset = pMesh->mBones[i]->mOffsetMatrix;
+
+        for (int j = 0; j < pMesh->mBones[i]->mNumWeights; j++) {
+            int VertexID = pMesh->mBones[i]->mWeights[j].mVertexId;
+            float Weight = pMesh->mBones[i]->mWeights[j].mWeight;
+            
+
+            for (int i = 0; i < 4; i++) {
+                if (Bones[VertexID].Weights[i] == 0.0) {
+                    Bones[VertexID].IDs[i] = BoneIndex;
+                    Bones[VertexID].Weights[i] = Weight;
+                    return;
+                }
+            }
+
+        }
+    }
+}
 
 
 
