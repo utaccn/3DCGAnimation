@@ -4,6 +4,7 @@
 layout(location = 8) uniform sampler2D texShadow;
 layout(location = 4) uniform vec3 lightPos;
 layout(location = 5) uniform vec3 cameraPos;
+layout(location = 12) uniform sampler2D wood;
 
 //Parameters for Blinn-Phong shading
 vec3 lightColor = vec3(0.95, 0.5, 0.2);
@@ -18,7 +19,7 @@ layout(location = 0) out vec4 outColor;
 // Interpolated output data from vertex shader.
 in vec3 fragPos; // World-space position
 in vec3 fragNormal; // World-space normal
-
+in vec2 fragTexCoord;
 in vec4 fragLightCoord;
 vec3 lightCoord;
 float bias = 0.001;
@@ -76,6 +77,6 @@ vec2 shadowMapCoord = lightCoord.xy;
     // Output the normal as color
 
     //Render light with PCF
-    outColor = vec4(visibility*(ambientColor+lightColor*specular*vec3(max(dot(fragNormal,lightDir),0.0))),1.0);
+    outColor = vec4(texture(wood, fragTexCoord).rgb*visibility*(ambientColor+lightColor*specular*vec3(max(dot(fragNormal,lightDir),0.0))),1.0);
 
 }

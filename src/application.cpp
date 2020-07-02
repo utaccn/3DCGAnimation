@@ -58,6 +58,7 @@ public:
         , environment("resources/only_houses.obj")
         , just_floor("resources/floor.obj")
         , m_texture("resources/checkerboard.png")
+        , wood("resources/wood.jpg")
         , trees_head("resources/trees_head.obj")
         , trunks("resources/trunks.obj")
         , texToon("resources/zio.jpg")
@@ -336,6 +337,8 @@ public:
 
             if (x_shader == 0) {
                 m_defaultShader.bind();
+                wood.bind(GL_TEXTURE3);
+                glUniform1i(12, 3);
             }
             else {
                 x_ray.bind();
@@ -547,8 +550,8 @@ private:
     Shader minimapCharShader;
 
     int x_shader = 0;
-    int firstPerson = true;
-    int minimapSwitch = true;
+    bool firstPerson = true;
+    bool minimapSwitch = true;
     float radiusX = 0.01;
 
     Mesh robot;
@@ -561,6 +564,7 @@ private:
     Texture m_texture;
     Texture texToon;
     Texture grass;
+    Texture wood;
 
     // Projection and view matrices for you to fill in and use
     //glm::mat4 m_projectionMatrix = glm::perspective(glm::radians(80.0f), 1.0f, 0.1f, 300.0f);
