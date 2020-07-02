@@ -421,11 +421,8 @@ public:
                 glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
             }
             const glm::mat4 robotmodelMatrix1 = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
-            const glm::mat3 robotNormalModelMatrix1 = glm::inverseTranspose(glm::mat3(robotmodelMatrix));
             const glm::mat4 robotmvpMatrix1 = m_projectionMatrix * m_camera.viewMatrix() * robotmodelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(robotmvpMatrix1));
-            glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(robotmodelMatrix1));
-            glUniformMatrix3fv(2, 1, GL_FALSE, glm::value_ptr(robotNormalModelMatrix1));
             robot.draw();
 
             if (firstPerson == false) {
