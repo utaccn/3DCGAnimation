@@ -194,6 +194,13 @@ public:
             glEnable(GL_DEPTH_TEST);
 
             environment.draw();
+
+            glm::mat4 newMM = glm::scale(m_modelMatrix, glm::vec3(0.1, 0.1, 0.1));
+            newMM = glm::translate(newMM, glm::vec3(0, 2, 0));
+            newMM = glm::rotate(newMM, glm::radians(90.f), glm::vec3(1, 0, 0));
+            const glm::mat4 mvpMatrixMM = m_projectionMatrix * m_camera.viewMatrix() * newMM;
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrixMM));
+
             test.draw();
             if (firstPerson == false) {
                 glm::vec3 newCameraPos = glm::vec3(2., 1., 2.);

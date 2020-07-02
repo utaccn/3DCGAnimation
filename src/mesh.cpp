@@ -34,7 +34,7 @@ Mesh::Mesh(std::filesystem::path filePath)
 
     std::vector<Vertex> vertices;
     std::vector<unsigned> indices;
-    vector<VertexBoneData> Bones;
+    std::vector<VertexBoneData> Bones;
 
     std::stack<std::tuple<aiNode*, glm::mat4>> stack;
     stack.push({ scene->mRootNode, assimpMatrix(scene->mRootNode->mTransformation) });

@@ -1,4 +1,4 @@
-C:/Users/Reppas/Desktop/Master_Delft/3D_Computer_Graphics_and_Animation/Final Project 2/out/build/x64-Debug/CMakeFiles/FinalProject.dir
-C:/Users/Reppas/Desktop/Master_Delft/3D_Computer_Graphics_and_Animation/Final Project 2/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
-C:/Users/Reppas/Desktop/Master_Delft/3D_Computer_Graphics_and_Animation/Final Project 2/out/build/x64-Debug/CMakeFiles/copy_shaders.dir
-C:/Users/Reppas/Desktop/Master_Delft/3D_Computer_Graphics_and_Animation/Final Project 2/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/ricch/OneDrive/Desktop/Mauro/Uni/3D Computer Graphics and Animation/F_Project/out/build/x64-Debug/CMakeFiles/FinalProject.dir
+C:/Users/ricch/OneDrive/Desktop/Mauro/Uni/3D Computer Graphics and Animation/F_Project/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
+C:/Users/ricch/OneDrive/Desktop/Mauro/Uni/3D Computer Graphics and Animation/F_Project/out/build/x64-Debug/CMakeFiles/copy_shaders.dir
+C:/Users/ricch/OneDrive/Desktop/Mauro/Uni/3D Computer Graphics and Animation/F_Project/out/build/x64-Debug/CMakeFiles/edit_cache.dir
