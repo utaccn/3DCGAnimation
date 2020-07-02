@@ -14,9 +14,18 @@ DISABLE_WARNINGS_POP()
 #include <iostream>
 #include <stack>
 #include <vector>
+#include <map>
 
 static glm::mat4 assimpMatrix(const aiMatrix4x4& m);
 static glm::vec3 assimpVec(const aiVector3D& v);
+
+static const aiScene* scene;
+
+std::vector<VertexBoneData> Bones;
+std::map<std::string, int> m_BoneMapping;
+std::vector<BoneInfo> BoneInformation;
+
+aiMatrix4x4 m_GlobalInverseTransform;
 
 Mesh::Mesh(std::filesystem::path filePath)
 {
@@ -24,7 +33,7 @@ Mesh::Mesh(std::filesystem::path filePath)
         throw MeshLoadingException(fmt::format("File {} does not exist", filePath.string().c_str()));
 
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(filePath.string().data(), aiProcess_GenSmoothNormals | aiProcess_Triangulate);
+    scene = importer.ReadFile(filePath.string().data(), aiProcess_GenSmoothNormals | aiProcess_Triangulate);
 
     if (scene == nullptr || scene->mRootNode == nullptr || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE) {
         throw MeshLoadingException(fmt::format("Assimp failed to load mesh file {}", filePath.string().c_str()));
@@ -74,6 +83,11 @@ Mesh::Mesh(std::filesystem::path filePath)
                 }
                 vertices.push_back(Vertex { pos, normal, texCoord });
             }
+
+            //Bones
+            if (mesh->HasBones())
+                Bones.resize(vertices.size());
+
         }
 
         for (unsigned i = 0; i < node->mNumChildren; i++) {
@@ -190,6 +204,200 @@ static glm::vec3 assimpVec(const aiVector3D& v)
 {
     return glm::vec3(v.x, v.y, v.z);
 }
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void Mesh::BoneTransform(float TimeInSeconds, std::vector<aiMatrix4x4>& Transforms)
+{
+    aiMatrix4x4 Identity;
+
+    float TicksPerSecond = scene->mAnimations[0]->mTicksPerSecond != 0 ?
+        scene->mAnimations[0]->mTicksPerSecond : 25.0f;
+    float TimeInTicks = TimeInSeconds * TicksPerSecond;
+    float AnimationTime = fmod(TimeInTicks, scene->mAnimations[0]->mDuration);
+
+    Mesh::ReadNodeHeirarchy(AnimationTime, scene->mRootNode, Identity);
+
+    Transforms.resize(scene->mMeshes[0]->mNumBones);
+
+    for (int i = 0; i < scene->mMeshes[0]->mNumBones; i++) {
+        Transforms[i] = BoneInformation[i].FinalTransformation;
+    }
+}
+int Mesh::FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+    assert(pNodeAnim->mNumRotationKeys > 0);
+
+    for (int i = 0; i < pNodeAnim->mNumRotationKeys - 1; i++) {
+        if (AnimationTime < (float)pNodeAnim->mRotationKeys[i + 1].mTime) {
+            return i;
+        }
+    }
+
+    assert(0);
+}
+
+int Mesh::FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+    assert(pNodeAnim->mNumScalingKeys > 0);
+
+    for (int i = 0; i < pNodeAnim->mNumScalingKeys - 1; i++) {
+        if (AnimationTime < (float)pNodeAnim->mScalingKeys[i + 1].mTime) {
+            return i;
+        }
+    }
+
+    assert(0);
+}
+
+
+void Mesh::CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+    // we need at least two values to interpolate...
+    if (pNodeAnim->mNumScalingKeys == 1) {
+        Out = pNodeAnim->mScalingKeys[0].mValue;
+        return;
+    }
+
+    int ScalingIndex = FindScaling(AnimationTime, pNodeAnim);
+    int NextScalingIndex = (ScalingIndex + 1);
+    assert(NextScalingIndex < pNodeAnim->mNumScalingKeys);
+    float DeltaTime = pNodeAnim->mScalingKeys[NextScalingIndex].mTime - pNodeAnim->mScalingKeys[ScalingIndex].mTime;
+    float Factor = (AnimationTime - (float)pNodeAnim->mScalingKeys[ScalingIndex].mTime) / DeltaTime;
+    assert(Factor >= 0.0f && Factor <= 1.0f);
+    const aiVector3D& StartScalingQ = pNodeAnim->mScalingKeys[ScalingIndex].mValue;
+    const aiVector3D& EndScalingQ = pNodeAnim->mScalingKeys[NextScalingIndex].mValue;
+    // Interpolation !!!
+    
+    Out = Out.Normalize();
+}
+
+void Mesh::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const aiMatrix4x4& ParentTransform)
+{
+    std::string NodeName(pNode->mName.data);
+
+    const aiAnimation* pAnimation = scene->mAnimations[0];
+
+    aiMatrix4x4 NodeTransformation(pNode->mTransformation);
+
+    const aiNodeAnim* pNodeAnim;
+
+    for (int i = 0; i < pAnimation->mNumChannels;) {
+        if (pAnimation->mChannels[0]->mNodeName.data == NodeName)
+            pNodeAnim = pAnimation->mChannels[0];
+    }
+
+
+    if (pNodeAnim) {
+        // Interpolate scaling and generate scaling transformation matrix
+        /*aiVector3D Scaling;
+        CalcInterpolatedScaling(Scaling, AnimationTime, pNodeAnim);
+        aiMatrix4x4 ScalingM;
+        ScalingM.InitScaleTransform(Scaling.x, Scaling.y, Scaling.z);
+
+        // Interpolate rotation and generate rotation transformation matrix
+        aiQuaternion RotationQ;
+        Mesh::CalcInterpolatedRotation(RotationQ, AnimationTime, pNodeAnim);
+        aiMatrix4x4 RotationM = aiMatrix4x4(RotationQ.GetMatrix());
+
+        // Interpolate translation and generate translation transformation matrix
+        aiVector3D Translation;
+        Mesh::CalcInterpolatedPosition(Translation, AnimationTime, pNodeAnim);
+        aiMatrix4x4 TranslationM;
+        //TranslationM.InitTranslationTransform(Translation.x, Translation.y, Translation.z);
+
+        // Combine the above transformations
+        NodeTransformation = TranslationM * RotationM * ScalingM;
+        */
+    }
+
+    aiMatrix4x4 GlobalTransformation = ParentTransform * NodeTransformation;
+
+    if (m_BoneMapping.find(NodeName) != m_BoneMapping.end()) {
+        int BoneIndex = m_BoneMapping[NodeName];
+        BoneInformation[BoneIndex].FinalTransformation = m_GlobalInverseTransform * GlobalTransformation *
+            BoneInformation[BoneIndex].BoneOffset;
+    }
+
+    for (int i = 0; i < pNode->mNumChildren; i++) {
+        ReadNodeHeirarchy(AnimationTime, pNode->mChildren[i], GlobalTransformation);
+    }
+}
+
+
+void Mesh::CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+    // we need at least two values to interpolate...
+    if (pNodeAnim->mNumRotationKeys == 1) {
+        Out = pNodeAnim->mRotationKeys[0].mValue;
+        return;
+    }
+
+    int RotationIndex = FindRotation(AnimationTime, pNodeAnim);
+    int NextRotationIndex = (RotationIndex + 1);
+    assert(NextRotationIndex < pNodeAnim->mNumRotationKeys);
+    float DeltaTime = pNodeAnim->mRotationKeys[NextRotationIndex].mTime - pNodeAnim->mRotationKeys[RotationIndex].mTime;
+    float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
+    assert(Factor >= 0.0f && Factor <= 1.0f);
+    const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
+    const aiQuaternion& EndRotationQ = pNodeAnim->mRotationKeys[NextRotationIndex].mValue;
+    aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
+    Out = Out.Normalize();
+}
+
+void Mesh::LoadBones(int MeshIndex)
+{
+    const aiMesh* pMesh = scene->mMeshes[0];
+    for (int i = 0; i < pMesh->mNumBones; i++) {
+        int BoneIndex = 0;
+        std::string BoneName(pMesh->mBones[i]->mName.data);
+
+        if (m_BoneMapping.find(BoneName) == m_BoneMapping.end()) {
+            BoneIndex = m_BoneMapping.size();
+
+            //m_NumBones++;
+            BoneInfo bi;
+            BoneInformation.push_back(bi);
+
+            m_BoneMapping.insert(std::pair<std::string, int>(BoneName, BoneIndex));
+        }
+        else {
+            BoneIndex = m_BoneMapping[BoneName];
+        }
+
+        BoneInformation[BoneIndex].BoneOffset = pMesh->mBones[i]->mOffsetMatrix;
+
+        for (int j = 0; j < pMesh->mBones[i]->mNumWeights; j++) {
+            int VertexID = pMesh->mBones[i]->mWeights[j].mVertexId;
+            float Weight = pMesh->mBones[i]->mWeights[j].mWeight;
+
+
+            for (int i = 0; i < 4; i++) {
+                if (Bones[VertexID].Weights[i] == 0.0) {
+                    Bones[VertexID].IDs[i] = BoneIndex;
+                    Bones[VertexID].Weights[i] = Weight;
+                    return;
+                }
+            }
+
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*#include "Model.h"
 #include <fstream>

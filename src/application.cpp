@@ -64,11 +64,12 @@ public:
         , wood("resources/wood.jpg")
         , trees_head("resources/trees_head.obj")
         , trunks("resources/trunks.obj")
+        , human("resources/attempt.dae")
         , texToon("resources/zio.jpg")
         , grass("resources/grass1.png")
         , redTexture("resources/redTexture.jpg")
         , m_camera { &m_window, glm::vec3(2.,2.0f, -2.f), -glm::vec3(2.f, 2.0f, -2.f) }
-        , cameraLight { &m_window, glm::vec3(30.f, 30.0f, -14.f), -glm::vec3(30.f, 30.0f, -14.f) }
+        , cameraLight { &m_window, glm::vec3(30.f, 33.0f, -14.f), -glm::vec3(30.f, 33.0f, -14.f) }
         , minimapCamera{ &m_window, glm::vec3(1.f, 45.0f, 0.f), -glm::vec3(1.f,45.0f, 0.f) }
 
     {
@@ -212,7 +213,7 @@ public:
                 m_mesh.draw();
                 trees_head.draw();
                 trunks.draw();
-
+                human.draw();
                 //Move model matrix to render shadow map for robot model
                 const glm::mat4 robotmodelMatrix = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
                 const glm::mat4 robotlightmvp = m_projectionMatrix * cameraLight.viewMatrix() *robotmodelMatrix;
@@ -242,6 +243,7 @@ public:
             glUniform3fv(5, 1, glm::value_ptr(minimapCamera.cameraPos()));
             const glm::vec3 lightPos = cameraLight.cameraPos();
             glUniform3fv(4, 1, glm::value_ptr(lightPos));
+            human.draw();
 
             // Bind the shadow map to texture slot 0
             GLuint texture_unit = 0;
@@ -319,6 +321,7 @@ public:
             environment.draw();
             trunks.draw();
             trees_head.draw();
+            human.draw();
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -366,6 +369,7 @@ public:
             glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
             trees_head.draw();
+            human.draw();
 
             if (x_shader == 0) {
                 trunkShader.bind();
@@ -434,7 +438,15 @@ public:
                 glUniform1i(15, 4);
                 glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMMatrix));
                 m_mesh.draw();
-            }          
+            } 
+
+            m_defaultShader.bind();
+            glm::mat4 newMM = glm::scale(m_modelMatrix, glm::vec3(0.1, 0.1, 0.1));
+            newMM = glm::translate(newMM, glm::vec3(0, 2, 0));
+            newMM = glm::rotate(newMM, glm::radians(90.f), glm::vec3(1, 0, 0));
+            const glm::mat4 mvpMatrixMM = m_projectionMatrix * m_camera.viewMatrix() * newMM;
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrixMM));
+            human.draw();
 
             //////Draw Minimap pressing 2/////
             if (minimapSwitch == 0) {
@@ -550,6 +562,7 @@ private:
     Mesh just_floor;
     Mesh trees_head;
     Mesh trunks;
+    Mesh human;
 
     Texture m_texture;
     Texture texToon;
