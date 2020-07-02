@@ -20,6 +20,7 @@ static const aiScene* scene;
 static Assimp::Importer importer;
 
 std::vector<VertexBoneData> Bones;
+
 std::map<std::string, int> m_BoneMapping;
 
 Mesh::Mesh(std::filesystem::path filePath)
@@ -123,16 +124,16 @@ Mesh::Mesh(std::filesystem::path filePath)
     glVertexArrayVertexBuffer(m_vao, 1, m_vbo, offsetof(Vertex, normal), sizeof(Vertex));
     glVertexArrayVertexBuffer(m_vao, 2, m_vbo, offsetof(Vertex, texCoord), sizeof(Vertex));
     // Bones
-    //glVertexArrayVertexBuffer(m_vao, 3, m_vbo, offsetof(Bones, /*???*/), sizeof(int));
+    glVertexArrayVertexBuffer(m_vao, 3, m_vbo, offsetof(VertexBoneData, IDs), sizeof(int));
     // Weights
-    //glVertexArrayVertexBuffer(m_vao, 2, m_vbo, offsetof(Vertex, /*???*/), sizeof(float));
+    glVertexArrayVertexBuffer(m_vao, 4, m_vbo, offsetof(VertexBoneData, Weights), sizeof(float));
     glEnableVertexArrayAttrib(m_vao, 0);
     glEnableVertexArrayAttrib(m_vao, 1);
     glEnableVertexArrayAttrib(m_vao, 2);
     // Bones
-    //glEnableVertexArrayAttrib(m_vao, 3);
+    glEnableVertexArrayAttrib(m_vao, 3);
     // Weights
-    //glEnableVertexArrayAttrib(m_vao, 4);
+    glEnableVertexArrayAttrib(m_vao, 4);
     m_numIndices = static_cast<GLsizei>(indices.size());
 }
 
@@ -219,6 +220,24 @@ static glm::vec3 assimpVec(const aiVector3D& v)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+glm::mat4 Mesh::BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms)
+{
+   glm::mat4 Identity = glm::mat4{ 1.0f };
+
+
+    float TicksPerSecond = scene->mAnimations[0]->mTicksPerSecond != 0 ?
+        scene->mAnimations[0]->mTicksPerSecond : 25.0f;
+    float TimeInTicks = TimeInSeconds * TicksPerSecond;
+    float AnimationTime = fmod(TimeInTicks, scene->mAnimations[0]->mDuration);
+
+    ReadNodeHeirarchy(AnimationTime, scene->mRootNode, Identity);
+
+    Transforms.resize(scene->mMeshes[0]->mNumBones);
+
+    for (int i = 0; i < scene->mMeshes[0]->mNumBones; i++) {
+        Transforms[i] = m_BoneInfo[i].FinalTransformation;
+    }
+}
 
 void Mesh::LoadBones(int MeshIndex)
 {

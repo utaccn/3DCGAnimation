@@ -23,8 +23,13 @@ struct Vertex {
 
 struct VertexBoneData
 {
+    
     int IDs[4];
     float Weights[4];
+};
+struct BoneInfo
+{
+std::vector<glm::mat4>
 };
 
 class Mesh {

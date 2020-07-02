@@ -109,6 +109,12 @@ public:
             trunksBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/trunk_frag.glsl");
             trunkShader = trunksBuilder.build();
 
+
+            ShaderBuilder testBuilder;
+            testBuilder.addStage(GL_VERTEX_SHADER, "shaders/test_vert.glsl");
+            testBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/test_frag.glsl");
+            testShader = testBuilder.build();
+
             // Any new shaders can be added below in similar fashion.
             // ==> Don't forget to reconfigure CMake when you do!
             //     Visual Studio: PROJECT => Generate Cache for ComputerGraphics
@@ -195,6 +201,7 @@ public:
 
             environment.draw();
 
+            testShader.bind();
             glm::mat4 newMM = glm::scale(m_modelMatrix, glm::vec3(0.1, 0.1, 0.1));
             newMM = glm::translate(newMM, glm::vec3(0, 2, 0));
             newMM = glm::rotate(newMM, glm::radians(90.f), glm::vec3(1, 0, 0));
@@ -345,6 +352,7 @@ private:
     Shader floorShader;
     Shader trees_headShader;
     Shader trunkShader;
+    Shader testShader;
 
     int x_shader = 0;
     int firstPerson = true;

@@ -56,7 +56,9 @@
 				11,
 				12,
 				13,
-				14
+				14,
+				15,
+				16
 			]
 		}
 	],
@@ -102,6 +104,18 @@
 			"backtrace" : 0,
 			"isGenerated" : true,
 			"path" : "out/build/x64-Debug/shaders/shadow_vert.glsl.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/shaders/test_frag.glsl.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/shaders/test_vert.glsl.rule",
 			"sourceGroupIndex" : 1
 		},
 		{
