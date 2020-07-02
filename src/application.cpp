@@ -286,7 +286,8 @@ public:
 
             //Character rendering on the minimap
             minimapCharShader.bind();
-            const glm::mat4 mvpMatrixChar = m_projectionMatrix * minimapCamera.viewMatrix() * m_modelMatrix;
+            glm::mat4 char_modelMatrix = glm::translate(m_modelMatrix, m_camera.cameraPos());
+            const glm::mat4 mvpMatrixChar = m_projectionMatrix * minimapCamera.viewMatrix() * char_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrixChar));
             m_mesh.draw();
             
@@ -314,7 +315,7 @@ public:
             glBindTexture(GL_TEXTURE_2D, texShadow);
             glUniform1i(8, 0);
             environment.draw();
-
+/*
             if (firstPerson == false) {
                 glm::vec3 newCameraPos = glm::vec3(2., 1., 2.);
                 glm::mat4 lucAt1 = glm::lookAt(newCameraPos, glm::vec3(0., 0., 0.), glm::vec3(0, 1, 0));
@@ -322,7 +323,7 @@ public:
                 glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMMatrix));
                 m_mesh.draw();
             }
-            else { m_mesh.draw(); }
+            else { m_mesh.draw(); } */
             if (x_shader == 0) {
                 trees_headShader.bind();
             }
@@ -375,6 +376,15 @@ public:
             glUniform3fv(3, 1, glm::value_ptr(cameraLight.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(m_camera.cameraPos()));
             robot.draw();
+
+            if (firstPerson == false) {
+                glm::vec3 newCameraPos = glm::vec3(2., 1., 2.);
+                glm::mat4 lucAt1 = glm::lookAt(newCameraPos, glm::vec3(0., 0., 0.), glm::vec3(0, 1, 0));
+                const glm::mat4 mvpMMatrix = m_projectionMatrix * lucAt1 * m_modelMatrix;
+                glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMMatrix));
+                m_mesh.draw();
+            }
+            
 
             //Draw Minimap pressing 2
             if (minimapSwitch == 0) {
