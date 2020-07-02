@@ -22,7 +22,7 @@ static Assimp::Importer importer;
 std::vector<VertexBoneData> Bones;
 
 std::map<std::string, int> m_BoneMapping;
-
+std::vector<BoneInfo> BoneInformation;
 Mesh::Mesh(std::filesystem::path filePath)
 {
     if (!std::filesystem::exists(filePath))
@@ -220,7 +220,7 @@ static glm::vec3 assimpVec(const aiVector3D& v)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-glm::mat4 Mesh::BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms)
+aiMatrix4x4 Mesh::BoneTransform(float TimeInSeconds, std::vector<aiMatrix4x4>& Transforms)
 {
    glm::mat4 Identity = glm::mat4{ 1.0f };
 
@@ -235,7 +235,54 @@ glm::mat4 Mesh::BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Trans
     Transforms.resize(scene->mMeshes[0]->mNumBones);
 
     for (int i = 0; i < scene->mMeshes[0]->mNumBones; i++) {
-        Transforms[i] = m_BoneInfo[i].FinalTransformation;
+        Transforms[i] = BoneInformation[i].FinalTransformation;
+    }
+}
+void Mesh::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const aiMatrix4x4& ParentTransform)
+{
+    std::string NodeName(pNode->mName.data);
+
+    const aiAnimation* pAnimation = scene->mAnimations[0];
+
+    aiMatrix4x4 NodeTransformation(pNode->mTransformation);
+
+    for (int i = 0; i < pAnimation->mNumChannels;) {
+        const aiNodeAnim* pNodeAnim = //FindNodeAnim(pAnimation, NodeName);
+    
+    }
+
+    if (pNodeAnim) {
+        // Interpolate scaling and generate scaling transformation matrix
+        aiVector3D Scaling;
+        CalcInterpolatedScaling(Scaling, AnimationTime, pNodeAnim);
+        aiMatrix4x4 ScalingM;
+        ScalingM.InitScaleTransform(Scaling.x, Scaling.y, Scaling.z);
+
+        // Interpolate rotation and generate rotation transformation matrix
+        aiQuaternion RotationQ;
+        CalcInterpolatedRotation(RotationQ, AnimationTime, pNodeAnim);
+        aiMatrix4x4 RotationM = aiMatrix4x4(RotationQ.GetMatrix());
+
+        // Interpolate translation and generate translation transformation matrix
+        aiVector3D Translation;
+        CalcInterpolatedPosition(Translation, AnimationTime, pNodeAnim);
+        aiMatrix4x4 TranslationM;
+        TranslationM.InitTranslationTransform(Translation.x, Translation.y, Translation.z);
+
+        // Combine the above transformations
+        NodeTransformation = TranslationM * RotationM * ScalingM;
+    }
+
+    aiMatrix4x4 GlobalTransformation = ParentTransform * NodeTransformation;
+
+    if (m_BoneMapping.find(NodeName) != m_BoneMapping.end()) {
+        int BoneIndex = m_BoneMapping[NodeName];
+        BoneInformation[BoneIndex].FinalTransformation = m_GlobalInverseTransform * GlobalTransformation *
+            BoneInformation[BoneIndex].BoneOffset;
+    }
+
+    for (int i = 0; i < pNode->mNumChildren; i++) {
+        ReadNodeHeirarchy(AnimationTime, pNode->mChildren[i], GlobalTransformation);
     }
 }
 
@@ -250,8 +297,8 @@ void Mesh::LoadBones(int MeshIndex)
             BoneIndex = m_BoneMapping.size();
 
             //m_NumBones++;
-            //BoneInfo bi;
-            //m_BoneInfo.push_back(bi);
+            BoneInfo bi;
+            BoneInformation.push_back(bi);
             
             m_BoneMapping.insert(std::pair<std::string, int>(BoneName, BoneIndex));
         }
@@ -259,7 +306,7 @@ void Mesh::LoadBones(int MeshIndex)
             BoneIndex = m_BoneMapping[BoneName];
         }
                 
-        //m_BoneInfo[BoneIndex].BoneOffset = pMesh->mBones[i]->mOffsetMatrix;
+        BoneInformation[BoneIndex].BoneOffset = pMesh->mBones[i]->mOffsetMatrix;
 
         for (int j = 0; j < pMesh->mBones[i]->mNumWeights; j++) {
             int VertexID = pMesh->mBones[i]->mWeights[j].mVertexId;

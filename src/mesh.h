@@ -27,10 +27,13 @@ struct VertexBoneData
     int IDs[4];
     float Weights[4];
 };
+
 struct BoneInfo
 {
-std::vector<glm::mat4>
+    aiMatrix4x4 BoneOffset;
+    aiMatrix4x4 FinalTransformation;
 };
+
 
 class Mesh {
 public:
@@ -50,6 +53,8 @@ public:
 private:
     void moveInto(Mesh&&);
     void freeGpuMemory();
+
+    aiMatrix4x4 BoneTransform(float TimeInSeconds, std::vector<aiMatrix4x4>& Transforms);
 
     void LoadBones(int MeshIndex);
 
