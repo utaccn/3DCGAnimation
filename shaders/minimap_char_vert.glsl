@@ -7,7 +7,7 @@ layout(location = 0) uniform mat4 mvpMatrix;
 layout(location = 0) in vec3 position; // World-space position
 layout(location = 1) in vec3 normal; // World-space normal
 layout(location = 2) in vec2 texCoord;
-// Data to pass to fragment shader
+
 out vec3 fragPos;
 out vec3 fragNormal;
 

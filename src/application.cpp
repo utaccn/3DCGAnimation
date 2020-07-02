@@ -21,6 +21,8 @@ DISABLE_WARNINGS_POP()
 #include <functional>
 #include <iostream>
 #include <vector>
+
+//Create quad class to render the minimap
 class quad {
 public:
     quad() {
@@ -49,6 +51,7 @@ public:
 
     GLuint vao, vbo;
 };
+
 class Application {
 public:
     Application()
@@ -63,6 +66,7 @@ public:
         , trunks("resources/trunks.obj")
         , texToon("resources/zio.jpg")
         , grass("resources/grass1.png")
+        , redTexture("resources/redTexture.jpg")
         , m_camera { &m_window, glm::vec3(2.,2.0f, -2.f), -glm::vec3(2.f, 2.0f, -2.f) }
         , cameraLight { &m_window, glm::vec3(30.f, 30.0f, -14.f), -glm::vec3(30.f, 30.0f, -14.f) }
         , minimapCamera{ &m_window, glm::vec3(1.f, 45.0f, 0.f), -glm::vec3(1.f,45.0f, 0.f) }
@@ -83,7 +87,7 @@ public:
         glCreateFramebuffers(1, &framebuffer);
         glNamedFramebufferTexture(framebuffer, GL_DEPTH_ATTACHMENT, texShadow, 0);
 
-        //MINIMAP
+        //Create MINIMAP texture
         glCreateTextures(GL_TEXTURE_2D, 1, &minimap);
         glBindTexture(GL_TEXTURE_2D, minimap);
         glTextureParameteri(minimap, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -164,6 +168,11 @@ public:
             minicharBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/minimap_char_frag.glsl");
             minimapCharShader = minicharBuilder.build();
 
+            ShaderBuilder charBuilder;
+            charBuilder.addStage(GL_VERTEX_SHADER, "shaders/char_vert.glsl");
+            charBuilder.addStage(GL_FRAGMENT_SHADER, "shaders/char_frag.glsl");
+            charShader = charBuilder.build();
+
         } catch (ShaderLoadingException e) {
             std::cerr << e.what() << std::endl;
         }
@@ -183,11 +192,11 @@ public:
 
     void update()
     {
-        // This is your game loop
-        // Put your real-time logic and rendering in here
         while (!m_window.shouldClose()) {
             m_window.updateInput();
             {
+                //Draw shadow Map
+
                 glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
                 glClearDepth(1.0f);
                 glClear(GL_DEPTH_BUFFER_BIT);
@@ -196,21 +205,22 @@ public:
                 m_shadowShader.bind();
                 glViewport(0, 0, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
 
-                const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix()*m_modelMatrix; // Assume model matrix is identity.
+                const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix()*m_modelMatrix; 
                 glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
 
                 environment.draw();
                 m_mesh.draw();
                 trees_head.draw();
                 trunks.draw();
+
                 //Move model matrix to render shadow map for robot model
                 const glm::mat4 robotmodelMatrix = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
                 const glm::mat4 robotlightmvp = m_projectionMatrix * cameraLight.viewMatrix() *robotmodelMatrix;
                 glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(robotlightmvp));
                 robot.draw();
 
-                // Unbind the off-screen framebuffer
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                //End shadow Map draw
 
             }
             glClearDepth(1.0f);
@@ -218,21 +228,16 @@ public:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glDisable(GL_CULL_FACE);
             glEnable(GL_DEPTH_TEST);
+
+            //Draw Minimap in "framebuffo"
             glBindFramebuffer(GL_FRAMEBUFFER, framebuffo);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glViewport(0, 0, 256, 256);
-            if (x_shader == 0){
-                m_defaultShader.bind();
-            }
-            else {
-                x_ray.bind();
-                texToon.bind(GL_TEXTURE1);
-                glUniform1i(10, 1);
-            }     
-            const glm::mat3 normalModelMatrix = glm::inverseTranspose(glm::mat3(m_modelMatrix));
+
+            m_defaultShader.bind(); 
             const glm::mat4 mvpMatrix = m_projectionMatrix * minimapCamera.viewMatrix()* m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
-            const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix(); // Assume model matrix is identity.
+            const glm::mat4 lightmvp = m_projectionMatrix * cameraLight.viewMatrix(); 
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp));
             glUniform3fv(5, 1, glm::value_ptr(minimapCamera.cameraPos()));
             const glm::vec3 lightPos = cameraLight.cameraPos();
@@ -245,14 +250,7 @@ public:
             glUniform1i(8, texture_unit);
             environment.draw();
 
-            if (x_shader == 0) {
-                trees_headShader.bind();
-            }
-            else {
-                x_ray.bind();
-                texToon.bind(GL_TEXTURE1);
-                glUniform1i(10, 1);
-            }
+            trees_headShader.bind();
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
             glUniform3fv(5, 1, glm::value_ptr(minimapCamera.cameraPos()));
@@ -260,14 +258,7 @@ public:
             glUniform1i(8, 0);
             trees_head.draw();
 
-            if (x_shader == 0) {
-                trunkShader.bind();
-            }
-            else {
-                x_ray.bind();
-                texToon.bind(GL_TEXTURE1);
-                glUniform1i(10, 1);
-            }
+            trunkShader.bind();
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
             glUniform3fv(5, 1, glm::value_ptr(minimapCamera.cameraPos()));
@@ -276,9 +267,9 @@ public:
             trunks.draw();
             
             floorShader.bind();
-                grass.bind(GL_TEXTURE2);
-                glUniform1i(9, 2);
-                const glm::mat4 mvpMatrixF = m_projectionMatrix * minimapCamera.viewMatrix()* m_modelMatrix;
+            grass.bind(GL_TEXTURE2);
+            glUniform1i(9, 2);
+            const glm::mat4 mvpMatrixF = m_projectionMatrix * minimapCamera.viewMatrix()* m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrixF));
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix* cameraLight.viewMatrix()));
             glUniform3fv(5, 1, glm::value_ptr(minimapCamera.cameraPos()));
@@ -305,20 +296,19 @@ public:
             m_mesh.draw();
             
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            //End minimap rendering
+            //////End minimap rendering//////
 
-            //Start x-ray depth rendering
+            //////Start x-ray depth rendering//////
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glBindFramebuffer(GL_FRAMEBUFFER, xraybuffer);
             glClearDepth(1.0f);
             glClear(GL_DEPTH_BUFFER_BIT);
             glEnable(GL_DEPTH_TEST);
             glViewport(0, 0, 1024, 1024);
-                m_defaultShader.bind();
-            const glm::mat3 normalModelMatrix1 = glm::inverseTranspose(glm::mat3(m_modelMatrix));
+            m_defaultShader.bind();
             const glm::mat4 mvpMatrix1 = m_projectionMatrix * m_camera.viewMatrix() * m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrix1));
-            const glm::mat4 lightmvp1 = m_projectionMatrix * cameraLight.viewMatrix(); // Assume model matrix is identity.
+            const glm::mat4 lightmvp1 = m_projectionMatrix * cameraLight.viewMatrix(); 
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(lightmvp1));
             glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
             const glm::vec3 lightPos1 = cameraLight.cameraPos();
@@ -332,7 +322,7 @@ public:
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            //End x-ray depth rendering
+            //////End x-ray depth rendering/////
             glViewport(0, 0, 1024, 1024);
 
             if (x_shader == 0) {
@@ -355,15 +345,7 @@ public:
             glUniform3fv(5, 1, glm::value_ptr(m_camera.cameraPos()));
             glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
             environment.draw();
-/*
-            if (firstPerson == false) {
-                glm::vec3 newCameraPos = glm::vec3(2., 1., 2.);
-                glm::mat4 lucAt1 = glm::lookAt(newCameraPos, glm::vec3(0., 0., 0.), glm::vec3(0, 1, 0));
-                const glm::mat4 mvpMMatrix = m_projectionMatrix * lucAt1 * m_modelMatrix;
-                glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMMatrix));
-                m_mesh.draw();
-            }
-            else { m_mesh.draw(); } */
+
             if (x_shader == 0) {
                 trees_headShader.bind();
                 glActiveTexture(GL_TEXTURE0);
@@ -403,10 +385,10 @@ public:
             glUniform3fv(4, 1, glm::value_ptr(cameraLight.cameraPos()));
             trunks.draw();
 
+
             floorShader.bind();
             grass.bind(GL_TEXTURE2);
             glUniform1i(9, 2);
-            //}
             const glm::mat4 mvpMatrixF1 = m_projectionMatrix * m_camera.viewMatrix() * m_modelMatrix;
             glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMatrixF1));
             glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix * cameraLight.viewMatrix()));
@@ -419,6 +401,18 @@ public:
 
             //Robot model with Toon shading
             toonShader.bind();
+            if (x_shader == 0) {
+                toonShader.bind();
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, texShadow);
+                glUniform1i(8, 0);
+            }
+            else {
+                x_ray.bind();
+                texToon.bind(GL_TEXTURE1);
+                glUniform1i(10, 1);
+                glUniform1f(20, radiusX);
+            }
             const glm::mat4 robotmodelMatrix1 = glm::translate(m_modelMatrix, glm::vec3(2.0, 0.3, 0.0));
             const glm::mat3 robotNormalModelMatrix1 = glm::inverseTranspose(glm::mat3(robotmodelMatrix));
             const glm::mat4 robotmvpMatrix1 = m_projectionMatrix * m_camera.viewMatrix() * robotmodelMatrix;
@@ -430,15 +424,17 @@ public:
             robot.draw();
 
             if (firstPerson == false) {
+                charShader.bind();
                 glm::vec3 newCameraPos = glm::vec3(2., 1., 2.);
                 glm::mat4 lucAt1 = glm::lookAt(newCameraPos, glm::vec3(0., 0., 0.), glm::vec3(0, 1, 0));
                 const glm::mat4 mvpMMatrix = m_projectionMatrix * lucAt1 * m_modelMatrix;
+                redTexture.bind(GL_TEXTURE4);
+                glUniform1i(15, 4);
                 glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(mvpMMatrix));
                 m_mesh.draw();
-            }
-            
+            }          
 
-            //Draw Minimap pressing 2
+            //////Draw Minimap pressing 2/////
             if (minimapSwitch == 0) {
                 glEnable(GL_SCISSOR_TEST);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -465,9 +461,6 @@ public:
         glDeleteTextures(1, &minimap);
     }
 
-    // In here you can handle key presses
-    // key - Integer that corresponds to numbers in https://www.glfw.org/docs/latest/group__keys.html
-    // mods - Any modifier keys pressed, like shift or control
     int onKeyPressed(int key, int mods)
     {
         if (key == 88 && x_shader==0) {
@@ -495,28 +488,22 @@ public:
         if (key == 86) {
             radiusX -= 0.01;
         }
+
         std::cout << "Key pressed: " << key << std::endl;
            return key;
 
     }
 
-    // In here you can handle key releases
-    // key - Integer that corresponds to numbers in https://www.glfw.org/docs/latest/group__keys.html
-    // mods - Any modifier keys pressed, like shift or control
     void onKeyReleased(int key, int mods)
     {
         std::cout << "Key released: " << key << std::endl;
     }
 
-    // If the mouse is moved this function will be called with the x, y screen-coordinates of the mouse
     void onMouseMove(const glm::dvec2& cursorPos)
     {
         std::cout << "Mouse at position: " << cursorPos.x << " " << cursorPos.y << std::endl;
         }
 
-    // If one of the mouse buttons is pressed this function will be called
-    // button - Integer that corresponds to numbers in https://www.glfw.org/docs/latest/group__buttons.html
-    // mods - Any modifier buttons pressed
     void onMouseClicked(int button, int mods)
     {
         std::cout << "cameraX:" << m_camera.cameraPos().x << "cameraY:" << m_camera.cameraPos().y << "cameraZ:" << m_camera.cameraPos().z << std::endl;
@@ -524,9 +511,6 @@ public:
        
     }
 
-    // If one of the mouse buttons is released this function will be called
-    // button - Integer that corresponds to numbers in https://www.glfw.org/docs/latest/group__buttons.html
-    // mods - Any modifier buttons pressed
     void onMouseReleased(int button, int mods)
     {
         std::cout << "Released mouse button: " << button << std::endl;
@@ -548,11 +532,15 @@ private:
     Shader trunkShader;
     Shader minimapShader;
     Shader minimapCharShader;
+    Shader charShader;
 
     int x_shader = 0;
     bool firstPerson = true;
     bool minimapSwitch = true;
     float radiusX = 0.01;
+    float moveX = 0.0;
+    float moveY = 0.0;
+    float increase = 0.0;
 
     Mesh robot;
     Mesh m_mesh;
@@ -565,13 +553,11 @@ private:
     Texture texToon;
     Texture grass;
     Texture wood;
+    Texture redTexture;
 
-    // Projection and view matrices for you to fill in and use
-    //glm::mat4 m_projectionMatrix = glm::perspective(glm::radians(80.0f), 1.0f, 0.1f, 300.0f);
     glm::mat4 m_projectionMatrix = glm::perspective(glm::pi<float>() / 4.0f, 1.0f, 0.1f, 500.0f);  
     glm::mat4 m_viewMatrix = glm::lookAt(glm::vec3(-1, 1, -1), glm::vec3(0), glm::vec3(0, 1, 0));
     glm::mat4 m_modelMatrix { 1.0f };
-
 
 };
 

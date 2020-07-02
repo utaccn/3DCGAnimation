@@ -60,7 +60,9 @@
 				15,
 				16,
 				17,
-				18
+				18,
+				19,
+				20
 			]
 		}
 	],
@@ -76,6 +78,18 @@
 			"backtrace" : 0,
 			"isGenerated" : true,
 			"path" : "out/build/x64-Debug/CMakeFiles/copy_shaders.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/shaders/char_frag.glsl.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/shaders/char_vert.glsl.rule",
 			"sourceGroupIndex" : 1
 		},
 		{

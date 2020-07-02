@@ -50,17 +50,6 @@ void Camera::rotateX(float angle)
     m_up = glm::normalize(glm::cross(m_forward, horAxis));
 }
 
-/*
-float degreesX;
-float Camera::rotationX()
-{
-    return degreesX;
-}
-float degreesY;
-float Camera::rotationY()
-{
-    return degreesY;
-} */
 
 void Camera::rotateY(float angle)
 {
@@ -72,7 +61,7 @@ void Camera::rotateY(float angle)
 
 void Camera::updateCamera()
 {
-    constexpr float moveSpeed = 0.01f;
+    constexpr float moveSpeed = 0.03f;
     constexpr float lookSpeed = 0.0035f;
 
     if (m_userInteraction) {

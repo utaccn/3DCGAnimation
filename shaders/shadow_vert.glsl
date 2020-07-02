@@ -1,18 +1,9 @@
 #version 450
-//layout(location = 0) uniform mat4 mvpMatrix;
-//layout(location = 0) in vec3 position;
-//void main()
-//{
-//    gl_Position = mvpMatrix * vec4(position, 1);
-//}
-
-
 // Model/view/projection matrix
 layout(location = 0) uniform mat4 mvp;
 
-// Per-vertex attributes
-layout(location = 0) in vec3 pos; // World-space position
-layout(location = 1) in vec3 normal; // World-space normal
+layout(location = 0) in vec3 pos; 
+layout(location = 1) in vec3 normal; 
 layout(location = 3) uniform mat4 lightMVP;
 
 // Data to pass to fragment shader
