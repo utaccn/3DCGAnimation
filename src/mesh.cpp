@@ -39,13 +39,14 @@ Mesh::Mesh(std::filesystem::path filePath)
 
     std::vector<Vertex> vertices;
     std::vector<unsigned> indices;
+    vector<VertexBoneData> Bones;
 
     std::stack<std::tuple<aiNode*, glm::mat4>> stack;
     stack.push({ scene->mRootNode, assimpMatrix(scene->mRootNode->mTransformation) });
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    std::cout << "Mesh: " << scene->mMeshes[0]->mName.data << " Stack: " << stack.size() << std::endl;
+    //std::cout << "Mesh: " << scene->mMeshes[0]->mName.data << " Stack: " << stack.size() << std::endl;
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -87,6 +88,10 @@ Mesh::Mesh(std::filesystem::path filePath)
                 }
                 vertices.push_back(Vertex { pos, normal, texCoord });
             }
+
+            //Bones
+            if (mesh->HasBones())            
+                Bones.resize(vertices.size());
         }
 
         for (unsigned i = 0; i < node->mNumChildren; i++) {
@@ -94,11 +99,11 @@ Mesh::Mesh(std::filesystem::path filePath)
         }
     }
 
-
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     std::cout << "Mesh: " << scene->mMeshes[0]->mName.data << " Vertices: " << vertices.size() << " Indices: " << indices.size() << std::endl;
     
-    
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     importer.FreeScene();
 
@@ -122,10 +127,13 @@ Mesh::Mesh(std::filesystem::path filePath)
     glVertexArrayVertexBuffer(m_vao, 0, m_vbo, offsetof(Vertex, pos), sizeof(Vertex));
     glVertexArrayVertexBuffer(m_vao, 1, m_vbo, offsetof(Vertex, normal), sizeof(Vertex));
     glVertexArrayVertexBuffer(m_vao, 2, m_vbo, offsetof(Vertex, texCoord), sizeof(Vertex));
+    // Bones
+    // Weights
     glEnableVertexArrayAttrib(m_vao, 0);
     glEnableVertexArrayAttrib(m_vao, 1);
     glEnableVertexArrayAttrib(m_vao, 2);
-
+    // Bones
+    // Weights
     m_numIndices = static_cast<GLsizei>(indices.size());
 }
 

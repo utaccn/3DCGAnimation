@@ -16,8 +16,8 @@ struct Vertex {
     glm::vec3 pos;
     glm::vec3 normal;
     glm::vec2 texCoord;
-    int boneIDs[4];
-    int boneWeights[4];
+    //int boneIDs[4];
+    //int boneWeights[4];
 };
 
 struct VertexBoneData
