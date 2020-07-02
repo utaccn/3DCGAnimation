@@ -14,11 +14,6 @@ DISABLE_WARNINGS_POP()
 #include <iostream>
 #include <stack>
 #include <vector>
-#include <Eigen/Dense>
-#include <fstream>
-
-using namespace std;
-using namespace Eigen;
 
 static glm::mat4 assimpMatrix(const aiMatrix4x4& m);
 static glm::vec3 assimpVec(const aiVector3D& v);

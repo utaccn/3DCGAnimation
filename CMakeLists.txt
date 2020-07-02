@@ -23,10 +23,6 @@ find_package(Microsoft.GSL CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 # NOTE: stb does not support find_package. Just gotta hope that CMake or the compiler picks up the header file.
 find_package(assimp CONFIG REQUIRED)
-#find_package(Eigen3 REQUIRED)
-find_package(Eigen3 CONFIG REQUIRED)
-
-#include_directories("C:/Users/Reppas/Desktop/Master_Delft/3D_Computer_Graphics_and_Animation/eigen")
 
 set(PLATFORM_SPECIFIC_PACKAGES "")
 if (UNIX)
@@ -63,7 +59,6 @@ target_link_libraries(FinalProject PRIVATE
 	Microsoft.GSL::GSL
 	assimp::assimp
 	fmt::fmt
-	Eigen3::Eigen
 	${PLATFORM_SPECIFIC_PACKAGES})
 enable_sanitizers(FinalProject)
 set_project_warnings(FinalProject)

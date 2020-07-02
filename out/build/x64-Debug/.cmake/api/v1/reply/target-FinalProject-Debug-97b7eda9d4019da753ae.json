@@ -34,7 +34,7 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 47,
+				"line" : 43,
 				"parent" : 0
 			},
 			{
@@ -46,19 +46,19 @@
 			{
 				"command" : 2,
 				"file" : 1,
-				"line" : 59,
+				"line" : 55,
 				"parent" : 0
 			},
 			{
 				"command" : 3,
 				"file" : 1,
-				"line" : 98,
+				"line" : 93,
 				"parent" : 0
 			},
 			{
 				"command" : 5,
 				"file" : 1,
-				"line" : 69,
+				"line" : 64,
 				"parent" : 0
 			},
 			{
@@ -204,11 +204,6 @@
 					"backtrace" : 3,
 					"isSystem" : true,
 					"path" : "C:/Users/Reppas/AppData/Local/pmm/1.4.2/vcpkg-acff7d4aa6e18355585ba52c1eba789c02ed3fef/installed/x64-windows/include"
-				},
-				{
-					"backtrace" : 3,
-					"isSystem" : true,
-					"path" : "C:/Users/Reppas/Desktop/Master_Delft/3D_Computer_Graphics_and_Animation/eigen"
 				}
 			],
 			"language" : "CXX",

@@ -40,14 +40,14 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "FinalProject::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-FinalProject-Debug-1ef72ab24b38fd4bcc50.json",
+					"jsonFile" : "target-FinalProject-Debug-97b7eda9d4019da753ae.json",
 					"name" : "FinalProject",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "copy_shaders::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-copy_shaders-Debug-203bf19a8cf6a57e85b7.json",
+					"jsonFile" : "target-copy_shaders-Debug-456746be2be0986cab9d.json",
 					"name" : "copy_shaders",
 					"projectIndex" : 0
 				}
